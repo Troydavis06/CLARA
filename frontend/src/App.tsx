@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import TargetSelector from "./components/TargetSelector";
 import FileUpload from "./components/FileUpload";
 import PipelineProgress from "./components/PipelineProgress";
@@ -66,6 +66,7 @@ export default function App() {
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const esRef = useRef<EventSource | null>(null);
 
   const handleFilesSelected = useCallback((files: UploadedFile[]) => {
     setUploadedFiles(files);
@@ -101,6 +102,7 @@ export default function App() {
       const { run_id } = await res.json();
 
       const es = new EventSource(`${API}/analyze/${run_id}/stream`);
+      esRef.current = es;
       es.onmessage = (e) => {
         const event: StepEvent = JSON.parse(e.data);
         setSteps((prev) => [...prev, event]);
@@ -108,22 +110,34 @@ export default function App() {
           setReport(event.report);
           setRunning(false);
           es.close();
+          esRef.current = null;
         }
         if (event.type === "error") {
           setError(event.message ?? "Unknown error");
           setRunning(false);
           es.close();
+          esRef.current = null;
         }
       };
       es.onerror = () => {
         setError("Connection error. Is the backend running?");
         setRunning(false);
         es.close();
+        esRef.current = null;
       };
     } catch {
       setError("Failed to connect to backend.");
       setRunning(false);
     }
+  }
+
+  function stopAnalysis() {
+    if (esRef.current) {
+      esRef.current.close();
+      esRef.current = null;
+    }
+    setRunning(false);
+    setError("Analysis stopped by user.");
   }
 
   function exportReport() {
@@ -294,16 +308,26 @@ export default function App() {
             </button>
           )}
 
-          {/* Run Agent button */}
-          <button
-            onClick={runAnalysis}
-            disabled={running || !canAnalyze}
-            className="px-5 py-2 rounded-lg text-xs font-bold text-white
-              transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
-              bg-blue-600 hover:bg-blue-500 hover:shadow-md"
-          >
-            {running ? "Analyzing…" : "Run Agent"}
-          </button>
+          {/* Run / Stop button */}
+          {running ? (
+            <button
+              onClick={stopAnalysis}
+              className="px-5 py-2 rounded-lg text-xs font-bold text-white
+                transition-all duration-200 bg-red-600 hover:bg-red-500 hover:shadow-md"
+            >
+              Stop
+            </button>
+          ) : (
+            <button
+              onClick={runAnalysis}
+              disabled={!canAnalyze}
+              className="px-5 py-2 rounded-lg text-xs font-bold text-white
+                transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
+                bg-blue-600 hover:bg-blue-500 hover:shadow-md"
+            >
+              Run Agent
+            </button>
+          )}
         </div>
       </header>
 

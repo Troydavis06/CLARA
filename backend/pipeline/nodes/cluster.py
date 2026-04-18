@@ -13,31 +13,35 @@ RULES:
 - If inputs are empty, return the schema with empty arrays and a warnings[] entry.
 """
 
-_CLUSTER_PROMPT = """## Task: CLUSTER
+_CLUSTER_PROMPT = """## Task: CLUSTER SECURITY FINDINGS
 
-Assign every finding below to exactly one attack surface category.
+You must assign EVERY finding ID listed below to exactly one attack surface category.
 
-Valid surfaces (use ONLY these keys):
-  authentication, data_access, dependency_chain, network_transport,
-  file_system, session_management, admin_interface
+ATTACK SURFACE RULES:
+- SQL injection, database queries → data_access
+- Hardcoded passwords, weak auth tokens → authentication
+- Weak crypto (MD5/DES) for passwords/tokens → authentication
+- npm/pip/OSS CVEs, library vulnerabilities → dependency_chain
+- CORS, CSP, missing security headers, XSS → network_transport
+- Session cookies, CSRF → session_management
+- File disclosure, path traversal, backup files → file_system
+- Admin routes, debug mode, error disclosure → admin_interface
+- subprocess shell=True, command injection → dependency_chain
 
-Assignment rules:
-- SQL injection → data_access
-- Hardcoded passwords/secrets → authentication
-- Weak crypto used for auth tokens/passwords → authentication
-- Weak crypto as a library CVE → dependency_chain
-- npm/OSS/pip CVEs → dependency_chain
-- ZAP session/cookie findings → session_management
-- ZAP CORS/CSP/header findings → network_transport
-- File disclosure, path traversal → file_system
-- Flask/Django debug mode, admin routes → admin_interface
-- CSRF → session_management
-- XSS → network_transport
+FINDINGS TO ASSIGN (you must place every ID into a cluster):
+{findings_json}
 
-Return ONLY this JSON schema:
+INSTRUCTIONS:
+1. Read each finding's title and CWE.
+2. Assign its "id" field to exactly one surface.
+3. Every single finding ID must appear in exactly one cluster's finding_ids list.
+4. Do NOT leave any cluster arrays empty if findings belong there.
+5. total_assigned MUST equal the total number of findings above.
+
+Return ONLY valid JSON in this exact format (fill in real IDs, not zeros):
 {{
   "clusters": {{
-    "authentication":     {{"finding_ids": [], "count": 0}},
+    "authentication":     {{"finding_ids": ["id-here", "..."], "count": 0}},
     "data_access":        {{"finding_ids": [], "count": 0}},
     "dependency_chain":   {{"finding_ids": [], "count": 0}},
     "network_transport":  {{"finding_ids": [], "count": 0}},
@@ -48,9 +52,6 @@ Return ONLY this JSON schema:
   "total_assigned": 0,
   "warnings": []
 }}
-
-FINDINGS TO CLUSTER:
-{findings_json}
 """
 
 
