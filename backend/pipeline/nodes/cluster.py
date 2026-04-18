@@ -3,7 +3,7 @@
 import json
 
 from ..config import VALID_SURFACES
-from ..gemini_utils import generate_with_backoff, get_client, default_model
+from ..llm_utils import generate_with_backoff, get_llm_model
 
 _SYSTEM = """You are CLARA, a security analysis engine. Respond with valid JSON only.
 RULES:
@@ -74,16 +74,13 @@ def run(state: dict) -> dict:
         return {**state, "clusters": {s: {"finding_ids": [], "count": 0} for s in VALID_SURFACES},
                 "current_step": "cluster"}
 
-    client = get_client()
-    model = default_model()
-
     slim = [{"id": f["id"], "title": f["title"], "severity": f["severity"],
              "cwe": f["cwe"], "source_tool": f["source_tool"]} for f in findings]
 
     prompt = _CLUSTER_PROMPT.format(findings_json=json.dumps(slim, indent=2))
 
     for attempt in range(2):
-        text = generate_with_backoff(client, model, prompt, _SYSTEM)
+        text = generate_with_backoff(prompt, _SYSTEM)
         try:
             result = json.loads(text)
         except (json.JSONDecodeError, Exception) as e:

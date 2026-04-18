@@ -3,7 +3,7 @@
 import json
 from collections.abc import AsyncGenerator
 
-from ..gemini_utils import stream_with_backoff, get_client, default_model
+from ..llm_utils import generate_with_backoff, get_llm_model
 
 _SYSTEM = """You are CLARA, a security analysis engine. Respond with valid JSON only.
 RULES:
@@ -87,9 +87,6 @@ def run(state: dict) -> dict:
     if not findings:
         return {**state, "chains": [], "current_step": "synthesize"}
 
-    client = get_client()
-    model = default_model()
-
     clusters_with_findings = _build_clusters_with_findings(clusters, findings)
     prompt = _SYNTHESIZE_PROMPT.format(
         target=state.get("target", "unknown"),
@@ -101,7 +98,7 @@ def run(state: dict) -> dict:
     finding_ids_set = {f["id"] for f in findings}
 
     for attempt in range(2):
-        full_text = stream_with_backoff(client, model, prompt, _SYSTEM, temperature=0.2)
+        full_text = generate_with_backoff(prompt, _SYSTEM, temperature=0.2)
 
         try:
             result = json.loads(full_text)

@@ -40,6 +40,7 @@ _runs: dict[str, dict] = {}
 class AnalyzeRequest(BaseModel):
     target: str
     demo: bool = False
+    uploaded_files: list[dict] | None = None
 
 
 @app.get("/targets")
@@ -60,6 +61,17 @@ def list_targets():
 
 @app.post("/analyze")
 async def start_analysis(req: AnalyzeRequest):
+    if req.uploaded_files:
+        # Custom upload mode — no target validation needed
+        run_id = str(uuid.uuid4())
+        _runs[run_id] = {
+            "status": "pending",
+            "target": req.target or "custom",
+            "demo": False,
+            "report": None,
+            "uploaded_files": req.uploaded_files,
+        }
+        return {"run_id": run_id}
     if req.target not in TARGETS:
         raise HTTPException(status_code=400, detail=f"Unknown target '{req.target}'")
     run_id = str(uuid.uuid4())
@@ -84,13 +96,14 @@ async def stream_run(run_id: str):
             golden_path = Path(GOLDEN_DIR) / f"{target}.json"
             if golden_path.exists():
                 report = json.loads(golden_path.read_text(encoding="utf-8"))
-            else:
-                yield sse("error", {"message": f"No golden file for {target} yet. Run without --demo first."})
+                run["report"] = report
+                run["status"] = "complete"
+                yield sse("complete", {"report": report})
                 return
-            run["report"] = report
-            run["status"] = "complete"
-            yield sse("complete", {"report": report})
-            return
+            else:
+                # Golden file doesn't exist - generate it on first run
+                yield sse("step_start", {"step": "generate_golden", "label": "Generating demo cache (first run)..."})
+                # Fall through to real pipeline run below, which will cache the result
 
         # Real pipeline run
         steps = ["ingest", "dedup", "cluster", "synthesize", "mitre_prioritize", "report"]
@@ -173,6 +186,13 @@ async def stream_run(run_id: str):
             report = final_state.get("report", {})
             run["report"] = report
             run["status"] = "complete"
+            
+            # Cache golden file for demo mode if requested
+            if demo:
+                golden_path = Path(GOLDEN_DIR) / f"{target}.json"
+                golden_path.parent.mkdir(parents=True, exist_ok=True)
+                golden_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+            
             yield sse("complete", {"report": report})
 
         except Exception as e:

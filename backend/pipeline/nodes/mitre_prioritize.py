@@ -2,7 +2,7 @@
 
 import json
 
-from ..gemini_utils import generate_with_backoff, get_client, default_model
+from ..llm_utils import generate_with_backoff, get_llm_model
 
 _SYSTEM = """You are CLARA, a security analysis engine. Respond with valid JSON only.
 RULES:
@@ -104,9 +104,6 @@ def run(state: dict) -> dict:
     if not chains:
         return {**state, "scored_chains": [], "current_step": "mitre_prioritize"}
 
-    client = get_client()
-    model = default_model()
-
     sev_lookup = {f["id"]: f["severity"] for f in findings}
     finding_severities = {
         c["id"]: {fid: sev_lookup.get(fid, "unknown") for fid in c.get("finding_ids", [])}
@@ -122,7 +119,7 @@ def run(state: dict) -> dict:
     chain_ids = [c["id"] for c in chains]
 
     for attempt in range(2):
-        text = generate_with_backoff(client, model, prompt, _SYSTEM)
+        text = generate_with_backoff(prompt, _SYSTEM)
         try:
             result = json.loads(text)
         except json.JSONDecodeError as e:
