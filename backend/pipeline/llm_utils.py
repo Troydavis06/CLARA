@@ -102,11 +102,27 @@ def _generate_gemini(
     max_attempts: int,
     model: str,
 ) -> str:
-    """Generate using Gemini backend."""
+    """Generate using Gemini backend (supports both API and Vertex AI)."""
     if not GEMINI_AVAILABLE:
         raise ImportError("google-generativeai package not installed")
     
-    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    # Check if using Vertex AI (project ID specified)
+    vertex_project = os.environ.get("VERTEX_PROJECT_ID")
+    vertex_location = os.environ.get("VERTEX_LOCATION", "us-central1")
+    
+    if vertex_project:
+        # Use Vertex AI
+        client = genai.Client(
+            vertexai=True,
+            project=vertex_project,
+            location=vertex_location,
+        )
+    else:
+        # Use Gemini API with API key
+        api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("VERTEX_API_KEY")
+        if not api_key:
+            raise ValueError("Either GEMINI_API_KEY/VERTEX_API_KEY or VERTEX_PROJECT_ID must be set")
+        client = genai.Client(api_key=api_key)
     
     for attempt in range(max_attempts):
         try:
@@ -136,7 +152,22 @@ def get_client():
     if get_llm_provider() == "gemini":
         if not GEMINI_AVAILABLE:
             raise ImportError("google-generativeai package not installed")
-        return genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        
+        # Check if using Vertex AI
+        vertex_project = os.environ.get("VERTEX_PROJECT_ID")
+        vertex_location = os.environ.get("VERTEX_LOCATION", "us-central1")
+        
+        if vertex_project:
+            return genai.Client(
+                vertexai=True,
+                project=vertex_project,
+                location=vertex_location,
+            )
+        else:
+            api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("VERTEX_API_KEY")
+            if not api_key:
+                raise ValueError("Either GEMINI_API_KEY/VERTEX_API_KEY or VERTEX_PROJECT_ID must be set")
+            return genai.Client(api_key=api_key)
     else:
         # Return a dummy object for Ollama since it doesn't need a client
         return None
