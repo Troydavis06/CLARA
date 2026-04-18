@@ -7,6 +7,7 @@ export default defineConfig({
     proxy: {
       "/analyze": "http://localhost:8000",
       "/targets": "http://localhost:8000",
+      "/upload": "http://localhost:8000",
     },
   },
 });

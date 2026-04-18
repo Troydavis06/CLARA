@@ -1,3 +1,160 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════════
+   CLARA — Cyberpunk Security Dashboard Theme
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes glowPulse {
+  0%, 100% { text-shadow: 0 0 10px rgba(52,211,153,0.5), 0 0 20px rgba(52,211,153,0.3); }
+  50% { text-shadow: 0 0 20px rgba(52,211,153,0.8), 0 0 40px rgba(52,211,153,0.5), 0 0 60px rgba(52,211,153,0.3); }
+}
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(52,211,153,0.2); }
+  50% { border-color: rgba(52,211,153,0.5); }
+}
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.03; }
+  50% { opacity: 0.07; }
+}
+@keyframes scanlineMove {
+  0% { top: -4px; }
+  100% { top: 100vh; }
+}
+@keyframes countPop {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes dotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+}
+@keyframes nodeComplete {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes terminalCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ── Utility Classes ── */
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out both; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out both; }
+.animate-slide-in-right { animation: slideInRight 0.5s ease-out both; }
+.animate-slide-in-left { animation: slideInLeft 0.5s ease-out both; }
+.animate-glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+.animate-border-glow { animation: borderGlow 2s ease-in-out infinite; }
+.animate-count-pop { animation: countPop 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-dot-pulse { animation: dotPulse 2s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(52,211,153,0.06) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+.animate-terminal-cursor { animation: terminalCursor 1s step-end infinite; }
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+/* ── Cyber Grid Overlay ── */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(52,211,153,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(52,211,153,0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridPulse 4s ease-in-out infinite;
+}
+
+/* ── Scanline ── */
+.scanline::before {
+  content: '';
+  position: fixed;
+  left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(52,211,153,0.15), transparent);
+  animation: scanlineMove 6s linear infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ── Glass Morphism ── */
+.glass {
+  background: rgba(17,24,39,0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(52,211,153,0.08);
+}
+.glass-strong {
+  background: rgba(17,24,39,0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(52,211,153,0.12);
+}
+
+/* ── Neon hover ── */
+.neon-hover { transition: box-shadow 0.3s ease, border-color 0.3s ease; }
+.neon-hover:hover {
+  box-shadow: 0 0 20px rgba(52,211,153,0.1), 0 0 40px rgba(52,211,153,0.05);
+  border-color: rgba(52,211,153,0.3);
+}
+
+/* ── Severity left-border accents ── */
+.severity-border-critical { border-left: 3px solid #ef4444; }
+.severity-border-high { border-left: 3px solid #f97316; }
+.severity-border-medium { border-left: 3px solid #eab308; }
+.severity-border-low { border-left: 3px solid #3b82f6; }
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #030712; }
+::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+/* ── Donut chart ── */
+@keyframes donutStroke {
+  from { stroke-dashoffset: 377; }
+}
+.donut-segment { animation: donutStroke 1.2s ease-out backwards; }
+
+/* ── Pipeline connector ── */
+.pipeline-connector {
+  background: linear-gradient(90deg, rgba(52,211,153,0.4), rgba(52,211,153,0.1));
+  height: 2px;
+}
+.pipeline-connector-active {
+  background: linear-gradient(90deg, rgba(52,211,153,0.6), rgba(59,130,246,0.4));
+  height: 2px;
+  animation: shimmer 1.5s linear infinite;
+  background-size: 200% 100%;
+}
