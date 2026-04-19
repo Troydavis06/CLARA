@@ -89,7 +89,7 @@ def _validate(chains: list[dict], finding_ids_set: set[str]) -> str | None:
                 return f"Unknown finding_id '{fid}' in chain '{c.get('name')}'"
         steps = c.get("narrative", "").strip().splitlines()
         if len(steps) < 3:
-            return f"Chain '{c.get('name')}' narrative has fewer than 3 steps"
+            return f"Chain '{c.get('name')}' narrative has fewer than 1 steps"
     return None
 
 
