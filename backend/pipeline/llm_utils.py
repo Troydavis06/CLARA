@@ -1,4 +1,4 @@
-"""Unified LLM interface supporting both Gemini and Ollama."""
+"""Unified LLM interface supporting Gemini, OpenAI, and Ollama."""
 
 import logging
 import os
@@ -20,6 +20,13 @@ try:
 except ImportError:
     GEMINI_AVAILABLE = False
     log.warning("google-genai not installed — Gemini unavailable")
+
+try:
+    from openai import OpenAI as OpenAIClient
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    log.warning("openai not installed — OpenAI unavailable")
 
 try:
     import ollama
@@ -56,13 +63,15 @@ def _extract_json(text: str) -> str:
 
 
 def get_llm_provider() -> str:
-    return os.environ.get("LLM_PROVIDER", "gemini").lower()
+    return os.environ.get("LLM_PROVIDER", "openai").lower()
 
 
 def get_llm_model() -> str:
     provider = get_llm_provider()
     if provider == "ollama":
         return os.environ.get("OLLAMA_MODEL", "llama3.2")
+    if provider == "openai":
+        return os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
     return os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
 
 
@@ -126,6 +135,51 @@ def _generate_groq_with_rotation(prompt: str, system: str, temperature: float) -
     raise RuntimeError(f"All {len(keys)} Groq keys failed. Last error: {last_err}")
 
 
+def _generate_openai(
+    prompt: str,
+    system: str,
+    temperature: float,
+    max_attempts: int,
+    model: str,
+) -> str:
+    import json as _json
+    if not OPENAI_AVAILABLE:
+        raise ImportError("openai package not installed")
+    api_key = os.environ.get("GPT_KEY") or os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("GPT_KEY or OPENAI_API_KEY must be set")
+    client = OpenAIClient(api_key=api_key)
+    for attempt in range(max_attempts):
+        prompt_preview = prompt[:80].replace("\n", " ")
+        log.info(f"  → OpenAI request  model={model}  attempt={attempt+1}/{max_attempts}  \"{prompt_preview}...\"")
+        t0 = time.time()
+        try:
+            completion = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=temperature,
+                response_format={"type": "json_object"},
+            )
+            raw = completion.choices[0].message.content
+            result = _extract_json(raw)
+            elapsed = time.time() - t0
+            log.info(f"  ✓ OpenAI OK  model={model}  elapsed={elapsed:.1f}s  response_chars={len(result)}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - t0
+            if attempt < max_attempts - 1:
+                wait = 5 * (2 ** attempt)
+                log.warning(f"  ✗ OpenAI FAILED  elapsed={elapsed:.1f}s  error={e}  retrying in {wait}s...")
+                time.sleep(wait)
+            else:
+                log.error(f"  ✗ OpenAI FAILED (final)  elapsed={elapsed:.1f}s  error={e}")
+                raise
+    return ""
+
+
 def generate_with_backoff(
     prompt: str,
     system: str,
@@ -137,6 +191,8 @@ def generate_with_backoff(
 
     if provider == "ollama":
         return _generate_ollama(prompt, system, temperature, max_attempts, model)
+    elif provider == "openai":
+        return _generate_openai(prompt, system, temperature, max_attempts, model)
     elif provider == "gemini":
         return _generate_gemini(prompt, system, temperature, max_attempts, model)
     else:
@@ -278,7 +334,15 @@ def _generate_gemini(
 
 # Backwards compatibility
 def get_client():
-    if get_llm_provider() == "gemini":
+    provider = get_llm_provider()
+    if provider == "openai":
+        if not OPENAI_AVAILABLE:
+            raise ImportError("openai package not installed")
+        api_key = os.environ.get("GPT_KEY") or os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("GPT_KEY or OPENAI_API_KEY must be set")
+        return OpenAIClient(api_key=api_key)
+    if provider == "gemini":
         if not GEMINI_AVAILABLE:
             raise ImportError("google-generativeai package not installed")
         vertex_project = os.environ.get("VERTEX_PROJECT_ID")
