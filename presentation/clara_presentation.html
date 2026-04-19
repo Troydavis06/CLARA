@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CLARA — Hook'em Hacks 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f7f8fc;--surface:#ffffff;--border:#e4e8f4;--border2:#d0d7ec;
+  --text:#0d1117;--muted:#6b7898;--muted2:#a0adc0;
+  --accent:#2a5cff;--accent-bg:#eef1ff;
+  --critical:#e02020;--crit-bg:#fff0f0;--crit-border:#ffd0d0;
+  --high:#d97706;--high-bg:#fffbeb;--high-border:#fde68a;
+  --medium:#0284c7;--med-bg:#f0f9ff;
+  --green:#059669;--green-bg:#ecfdf5;--green-border:#a7f3d0;
+  --purple:#6d28d9;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#111;font-family:var(--sans);}
+#deck{width:100vw;height:100vh;position:relative;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;}
+.slide.active{display:flex;}
+#nav-wrap{position:fixed;bottom:20px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:10px;z-index:999;}
+.ndot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.25);cursor:pointer;transition:all 0.2s;border:none;}
+.ndot.on{background:#fff;transform:scale(1.3);}
+#slide-num{position:fixed;bottom:20px;left:28px;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;z-index:999;}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes lineIn{from{opacity:0}to{opacity:1}}
+
+/* S1 TITLE */
+#s0{background:var(--surface);}
+.s0-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 72px;text-align:center;}
+.s0-eyebrow{font-family:var(--mono);font-size:17px;color:var(--muted2);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:18px;animation:fadeUp 0.5s 0.1s both;}
+.s0-logo{font-family:var(--sans);font-size:clamp(80px,12vw,148px);font-weight:800;color:var(--text);letter-spacing:-0.02em;line-height:1;margin-bottom:14px;animation:fadeUp 0.6s 0.15s both;}
+.s0-logo span{color:var(--accent);}
+.s0-logo-img{height:clamp(220px,30vw,420px);width:auto;max-width:92%;margin-bottom:14px;animation:fadeUp 0.6s 0.15s both;}
+.s0-full{font-family:var(--mono);font-size:15px;color:var(--muted2);letter-spacing:0.06em;margin-bottom:20px;animation:fadeUp 0.5s 0.2s both;}
+.s0-badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.5s 0.28s both;}
+.badge{font-family:var(--mono);font-size:11px;padding:6px 16px;border-radius:20px;letter-spacing:0.04em;font-weight:500;}
+.b-ibm{background:#fff0f0;color:#d32f2f;border:1px solid #ef9a9a;}
+.b-google{background:#fffde7;color:#f57f17;border:1px solid #ffe082;}
+.b-startup{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;}
+.b-domain{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;}
+.s0-footer{padding:16px 72px 40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:fadeIn 0.6s 0.35s both;}
+.s0f-text{font-family:var(--mono);font-size:12px;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase;}
+.s0-chain{position:absolute;pointer-events:none;width:340px;opacity:0.55;}
+.s0-chain-tl{top:-60px;left:-40px;transform:rotate(15deg);}
+.s0-chain-br{bottom:-60px;right:-40px;transform:rotate(195deg);}
+
+/* S2 RAW CHAOS */
+#s1{background:var(--surface);cursor:pointer;}
+#s1-topbar{display:flex;align-items:center;gap:8px;padding:12px 24px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;}
+.mac-dot{width:12px;height:12px;border-radius:50%;}
+.md-r{background:#ff5f57;}.md-y{background:#febc2e;}.md-g{background:#28c840;}
+#s1-bar-title{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-left:10px;}
+#s1-bar-right{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted2);}
+#raw-chaos-feed{flex:1;overflow:hidden;padding:16px 48px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--muted);}
+.raw-line{opacity:0;animation:lineIn 0.1s forwards;word-break:break-all;white-space:pre-wrap;}
+.rl-bandit{color:#3a5f96;}
+.rl-zap{color:#7a5a0a;}
+.rl-npm{color:#1a6a3a;}
+.rl-osv{color:#5a3a8a;}
+.rl-blank{min-height:8px;display:block;}
+.rl-err{color:var(--critical);}
+#s1-overlay{position:absolute;inset:0;background:rgba(224,32,32,0);pointer-events:none;transition:background 2s;z-index:10;}
+#s1-prompt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+#s1-prompt-text{font-family:var(--mono);font-size:12px;color:var(--muted2);letter-spacing:0.14em;animation:blink 1.5s ease-in-out infinite;}
+#s1-frozen{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(80%,720px);background:#0d1117;border:2px solid var(--critical);border-radius:10px;padding:32px 48px;text-align:center;z-index:20;box-shadow:0 0 80px rgba(224,32,32,0.3),0 0 0 1px rgba(224,32,32,0.12);opacity:0;transition:opacity 0.5s;}
+#s1-frozen-big{font-family:var(--mono);font-size:20px;color:#ff4444;font-weight:700;letter-spacing:0.04em;}
+#s1-frozen-q{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(72%,640px);background:#0d1117;border:2px solid var(--critical);border-radius:10px;padding:22px 40px;text-align:center;z-index:25;box-shadow:0 0 80px rgba(224,32,32,0.35),0 0 0 1px rgba(224,32,32,0.12);opacity:0;transition:opacity 0.8s;}
+#s1-frozen-q-text{font-family:var(--mono);font-size:clamp(24px,2.6vw,30px);color:rgba(255,255,255,0.9);font-weight:700;letter-spacing:0.04em;text-align:center;}
+.s2-footer{background:var(--text);padding:12px 32px 40px;display:flex;align-items:center;border-top:1px solid var(--border);flex-shrink:0;gap:16px;}
+.s2f-count{flex-shrink:0;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.06em;}
+.s2f-count b{color:rgba(255,255,255,0.75);}
+.s2f-right{margin-left:auto;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:0.05em;white-space:nowrap;}
+
+/* S3 CONTRAST */
+#s2{background:var(--surface);}
+.s3-body{flex:1;padding:40px 56px 0;display:flex;flex-direction:column;min-height:0;}
+.slide-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.slide-eyebrow::before{content:'';width:20px;height:2px;background:var(--accent);border-radius:2px;}
+.contrast-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;min-height:0;align-items:start;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.panel-title{font-family:var(--mono);font-size:10px;color:var(--muted2);letter-spacing:0.12em;}
+.pill-r{font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:20px;background:var(--crit-bg);color:var(--critical);border:1px solid var(--crit-border);}
+.pill-g{font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:20px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.raw-body{flex:1;overflow:hidden;padding:14px 16px;font-family:var(--mono);font-size:9.5px;color:var(--muted2);line-height:2.0;}
+.rl-b{color:var(--muted);}
+.chains-panel{background:transparent;border:none;overflow:visible;display:flex;flex-direction:column;gap:8px;}
+.chains-panel .panel-hdr{background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+.chain-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;opacity:0;transform:translateX(18px);transition:opacity 0.45s ease,transform 0.45s ease;display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start;}
+.cc-c{border-color:var(--crit-border);box-shadow:0 2px 12px rgba(224,32,32,0.07);}
+.cc-h{border-color:var(--high-border);box-shadow:0 2px 12px rgba(217,119,6,0.07);}
+.cc-m{border-color:#fde68a;box-shadow:0 2px 12px rgba(234,179,8,0.07);}
+.chain-card.vis{opacity:1;transform:translateX(0);}
+.cc-left{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.cc-num-badge{width:44px;height:44px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;font-family:var(--mono);}
+.cc-num-badge .num-hash{font-size:9px;font-weight:700;opacity:0.65;}
+.cc-num-badge .num-val{font-size:19px;font-weight:800;}
+.cc-num-c{background:var(--crit-bg);color:var(--critical);}
+.cc-num-h{background:var(--high-bg);color:var(--high);}
+.cc-num-m{background:#fefce8;color:#ca8a04;}
+.csev{font-family:var(--mono);font-size:8px;padding:2px 7px;border-radius:4px;font-weight:700;text-align:center;}
+.csev-c{background:var(--critical);color:#fff;}
+.csev-h{background:var(--high);color:#fff;}
+.csev-m{background:#eab308;color:#fff;}
+.cc-right{display:flex;flex-direction:column;gap:6px;}
+.cc-title-row{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+.chain-name{font-size:12.5px;font-weight:700;color:var(--text);line-height:1.3;}
+.conf-pill{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.conf-c{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.conf-h{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;}
+.conf-m{background:#fefce8;color:#a16207;border:1px solid #fde68a;}
+.cc-path-row{display:flex;align-items:center;gap:8px;}
+.path-dots{display:flex;align-items:center;}
+.pdot{width:19px;height:19px;border-radius:50%;border:1.5px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:600;color:#9ca3af;background:#fff;}
+.pdot-c{background:var(--critical);border-color:var(--critical);color:#fff;}
+.pdot-h{background:var(--high);border-color:var(--high);color:#fff;}
+.pdot-m{background:#eab308;border-color:#eab308;color:#fff;}
+.path-conn{width:14px;height:1.5px;background:#d1d5db;}
+.path-label{font-family:var(--mono);font-size:9px;color:var(--muted2);}
+.cc-meta{font-family:var(--mono);font-size:9.5px;color:var(--muted2);}
+.mpills{display:flex;gap:5px;flex-wrap:wrap;}
+.mpill{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;background:var(--accent-bg);color:var(--accent);border:1px solid #c7d2fe;}
+.s3-footer{background:var(--text);padding:18px 56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.s3f-text{font-size:14px;color:rgba(255,255,255,0.6);font-style:italic;}
+.s3f-text strong{color:#fff;font-style:normal;}
+
+/* top accent bar on every slide */
+.slide::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);z-index:10;}
+
+/* HOW IT WORKS SLIDE */
+#s3{background:var(--surface);}
+.sdemo-body{flex:1;padding:44px 72px 44px;display:flex;flex-direction:column;justify-content:center;gap:28px;}
+.sdemo-head{text-align:left;}
+.sdemo-diagram-wrap{position:relative;display:flex;flex-direction:column;background:#fff;border:none;border-radius:20px;padding:40px 40px 28px;animation:fadeUp 0.5s 0.15s both;box-shadow:0 8px 48px rgba(42,92,255,0.10),0 2px 8px rgba(0,0,0,0.04);overflow:hidden;}
+.sdemo-diagram-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#3b82f6 0%,#8b5cf6 40%,#f59e0b 70%,#2a5cff 100%);}
+.pipeline-graph{display:flex;align-items:center;justify-content:center;}
+.pipeline-graph svg{width:100%;max-height:230px;}
+.sdemo-descs{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:20px;}
+.sdemo-desc{display:flex;flex-direction:column;gap:5px;padding:12px 14px;background:#fff;border:1px solid rgba(0,0,0,0.06);border-left-width:3px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+.sdemo-desc:nth-child(1){border-left-color:#3b82f6;}
+.sdemo-desc:nth-child(2){border-left-color:#3b82f6;}
+.sdemo-desc:nth-child(3){border-left-color:#8b5cf6;}
+.sdemo-desc:nth-child(4){border-left-color:#8b5cf6;}
+.sdemo-desc:nth-child(5){border-left-color:#f59e0b;}
+.sdemo-desc-name{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--text);}
+.sdemo-desc-text{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6;}
+.sdemo-desc-out{border-left-color:#2a5cff !important;background:#eef1ff;}
+.sdemo-desc-out .sdemo-desc-name{color:var(--accent);}
+.sdemo-desc-out .sdemo-desc-text{color:var(--accent);opacity:0.7;}
+
+/* S5 LET'S DEMO */
+#s4{background:#fff;}
+#s4::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(42,92,255,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.sdemo2-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 80px;position:relative;z-index:1;gap:20px;}
+.sdemo2-eyebrow{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s 0.05s both;}
+.sdemo2-eyebrow::before,.sdemo2-eyebrow::after{content:'';width:24px;height:2px;background:var(--accent);border-radius:2px;}
+.sdemo2-headline{font-family:var(--sans);font-size:clamp(52px,7vw,88px);font-weight:800;color:var(--text);line-height:1.05;letter-spacing:-0.02em;animation:fadeUp 0.5s 0.1s both;}
+.sdemo2-headline span{color:var(--accent);}
+.sdemo2-sub{font-family:var(--mono);font-size:14px;color:var(--muted2);letter-spacing:0.06em;animation:fadeUp 0.5s 0.2s both;}
+
+/* S6 ANY QUESTIONS */
+#s5{background:var(--surface);}
+.sq-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 80px;gap:24px;}
+.sq-logo{height:clamp(80px,10vw,120px);width:auto;animation:fadeUp 0.4s 0.05s both;}
+.sq-headline{font-family:var(--sans);font-size:clamp(40px,5.5vw,68px);font-weight:800;color:var(--text);letter-spacing:-0.02em;line-height:1.1;animation:fadeUp 0.5s 0.1s both;}
+.sq-headline span{color:var(--accent);}
+.sq-sub{font-family:var(--mono);font-size:13px;color:var(--muted2);letter-spacing:0.08em;animation:fadeUp 0.5s 0.15s both;}
+.sq-badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.5s 0.2s both;}
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <!-- SLIDE 1 -->
+  <div class="slide active" id="s0">
+    <img src="chain.png" class="s0-chain s0-chain-tl" alt="">
+    <img src="chain.png" class="s0-chain s0-chain-br" alt="">
+    <div class="s0-body">
+      <div class="s0-eyebrow">Hook'em Hacks 2026</div>
+      <img src="clara1.png" alt="CLARA" class="s0-logo-img">
+      <div class="s0-full">Contextual Layered Agent for Risk &amp; Remediation Analysis</div>
+      <div class="s0-badges">
+        <span class="badge b-ibm">IBM Security Track</span>
+        <span class="badge b-google">Best Gemini API</span>
+        <span class="badge b-startup">Most Startup Ready</span>
+        <span class="badge b-domain">Best Domain Name</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 -->
+  <div class="slide" id="s1">
+    <div id="s1-topbar">
+      <div class="mac-dot md-r"></div>
+      <div class="mac-dot md-y"></div>
+      <div class="mac-dot md-g"></div>
+      <span id="s1-bar-title">bash — security-scan-output.log</span>
+      <span id="s1-bar-right">4 tools · raw output</span>
+    </div>
+    <div id="s1-overlay"></div>
+    <div id="raw-chaos-feed">
+      <div id="s1-prompt">
+        <div id="s1-prompt-text">CLICK ANYWHERE OR PRESS SPACE TO TRIGGER</div>
+      </div>
+      <div id="s1-frozen">
+        <div id="s1-frozen-big">72 findings. 4 different formats. Zero prioritization.</div>
+      </div>
+      <div id="s1-frozen-q">
+        <div id="s1-frozen-q-text">"Which one do you fix first?"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 -->
+  <div class="slide" id="s2">
+    <div class="s3-body">
+      <div class="slide-eyebrow">The contrast</div>
+      <div class="contrast-grid">
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title">RAW SCAN OUTPUT</span>
+            <span class="pill-r">72 findings</span>
+          </div>
+          <div class="raw-body" id="raw-scroll"></div>
+        </div>
+        <div class="panel chains-panel">
+          <div class="panel-hdr">
+            <span class="panel-title">CLARA — ATTACK CHAINS</span>
+            <span class="pill-g">3 chains synthesized</span>
+          </div>
+          <div class="chain-card cc-c" id="cc1">
+            <div class="cc-left">
+              <div class="cc-num-badge cc-num-c"><span class="num-hash">#</span><span class="num-val">1</span></div>
+              <span class="csev csev-c">CRIT</span>
+            </div>
+            <div class="cc-right">
+              <div class="cc-title-row">
+                <span class="chain-name">JWT Verification Bypass to Prototype Pollution</span>
+                <span class="conf-pill conf-c">85% conf</span>
+              </div>
+              <div class="cc-path-row">
+                <div class="path-dots"><span class="pdot">1</span><span class="path-conn"></span><span class="pdot">2</span><span class="path-conn"></span><span class="pdot pdot-c">3</span></div>
+                <span class="path-label">3-step path</span>
+              </div>
+              <div class="cc-meta">2 findings &nbsp;·&nbsp; 2 surfaces</div>
+              <div class="mpills"><span class="mpill">T1190</span><span class="mpill">T1059</span><span class="mpill">T1059.006</span></div>
+            </div>
+          </div>
+          <div class="chain-card cc-h" id="cc2">
+            <div class="cc-left">
+              <div class="cc-num-badge cc-num-h"><span class="num-hash">#</span><span class="num-val">2</span></div>
+              <span class="csev csev-h">HIGH</span>
+            </div>
+            <div class="cc-right">
+              <div class="cc-title-row">
+                <span class="chain-name">CORS Misconfiguration to Uncontrolled Resource Consumption</span>
+                <span class="conf-pill conf-h">75% conf</span>
+              </div>
+              <div class="cc-path-row">
+                <div class="path-dots"><span class="pdot">1</span><span class="path-conn"></span><span class="pdot">2</span><span class="path-conn"></span><span class="pdot pdot-h">3</span></div>
+                <span class="path-label">3-step path</span>
+              </div>
+              <div class="cc-meta">2 findings &nbsp;·&nbsp; 2 surfaces</div>
+              <div class="mpills"><span class="mpill">T1071</span><span class="mpill">T1499</span><span class="mpill">T1190</span></div>
+            </div>
+          </div>
+          <div class="chain-card cc-m" id="cc3">
+            <div class="cc-left">
+              <div class="cc-num-badge cc-num-m"><span class="num-hash">#</span><span class="num-val">3</span></div>
+              <span class="csev csev-m">MEDI</span>
+            </div>
+            <div class="cc-right">
+              <div class="cc-title-row">
+                <span class="chain-name">Backup File Disclosure to Dangerous JS Functions</span>
+                <span class="conf-pill conf-m">55% conf</span>
+              </div>
+              <div class="cc-path-row">
+                <div class="path-dots"><span class="pdot">1</span><span class="path-conn"></span><span class="pdot">2</span><span class="path-conn"></span><span class="pdot pdot-m">3</span></div>
+                <span class="path-label">3-step path</span>
+              </div>
+              <div class="cc-meta">2 findings &nbsp;·&nbsp; 2 surfaces</div>
+              <div class="mpills"><span class="mpill">T1083</span><span class="mpill">T1005</span><span class="mpill">T1059</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 — LET'S DEMO -->
+  <div class="slide" id="s4">
+    <div class="sdemo2-body">
+      <div class="sdemo2-eyebrow">Live Demo</div>
+      <div class="sdemo2-headline">Let's Demo <span>This.</span></div>
+      <div class="sdemo2-sub">CLARA &nbsp;·&nbsp; Contextual Layered Agent for Risk &amp; Remediation Analysis</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 — HOW IT WORKS -->
+  <div class="slide" id="s3">
+    <div class="sdemo-body">
+      <div class="sdemo-head">
+        <div class="slide-eyebrow">How It Works</div>
+      </div>
+      <div class="sdemo-diagram-wrap">
+        <div class="pipeline-graph">
+            <svg viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg" id="pipe-svg">
+              <defs>
+                <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+                </marker>
+              </defs>
+              <line id="pl1" x1="118" y1="100" x2="172" y2="100" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)" opacity="0"/>
+              <line id="pl2" x1="268" y1="100" x2="322" y2="100" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)" opacity="0"/>
+              <line id="pl3" x1="418" y1="100" x2="472" y2="100" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)" opacity="0"/>
+              <line id="pl4" x1="568" y1="100" x2="622" y2="100" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)" opacity="0"/>
+              <line id="pl5" x1="718" y1="100" x2="762" y2="100" stroke="#2a5cff" stroke-width="2.5" marker-end="url(#arr)" opacity="0"/>
+              <g id="pn1" opacity="0">
+                <rect x="8" y="60" width="110" height="80" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+                <rect x="8" y="60" width="110" height="4" rx="2" fill="#3b82f6"/>
+                <text x="63" y="85" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#93c5fd" letter-spacing="1">01</text>
+                <text x="63" y="108" text-anchor="middle" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#1e3a8a">Ingest</text>
+              </g>
+              <g id="pn2" opacity="0">
+                <rect x="172" y="60" width="110" height="80" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+                <rect x="172" y="60" width="110" height="4" rx="2" fill="#3b82f6"/>
+                <text x="227" y="85" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#93c5fd" letter-spacing="1">02</text>
+                <text x="227" y="108" text-anchor="middle" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#1e3a8a">Deduplicate</text>
+              </g>
+              <g id="pn3" opacity="0">
+                <rect x="322" y="60" width="110" height="80" rx="10" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+                <rect x="322" y="60" width="110" height="4" rx="2" fill="#8b5cf6"/>
+                <text x="377" y="85" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#c4b5fd" letter-spacing="1">03</text>
+                <text x="377" y="108" text-anchor="middle" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#4c1d95">Cluster</text>
+              </g>
+              <g id="pn4" opacity="0">
+                <rect x="472" y="60" width="110" height="80" rx="10" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+                <rect x="472" y="60" width="110" height="4" rx="2" fill="#8b5cf6"/>
+                <text x="527" y="85" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#c4b5fd" letter-spacing="1">04</text>
+                <text x="527" y="108" text-anchor="middle" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#4c1d95">Synthesize</text>
+              </g>
+              <g id="pn5" opacity="0">
+                <rect x="622" y="60" width="110" height="80" rx="10" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+                <rect x="622" y="60" width="110" height="4" rx="2" fill="#f59e0b"/>
+                <text x="677" y="85" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#fcd34d" letter-spacing="1">05</text>
+                <text x="677" y="108" text-anchor="middle" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#78350f">MITRE Map</text>
+              </g>
+              <g id="pn6" opacity="0">
+                <rect x="762" y="44" width="130" height="112" rx="10" fill="#eef1ff" stroke="#2a5cff" stroke-width="2"/>
+                <rect x="762" y="44" width="130" height="5" rx="2" fill="#2a5cff"/>
+                <text x="827" y="76" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#2a5cff" letter-spacing="1" font-weight="700">OUTPUT</text>
+                <text x="827" y="104" text-anchor="middle" font-family="'Syne',sans-serif" font-size="15" font-weight="800" fill="#2a5cff">Attack</text>
+                <text x="827" y="123" text-anchor="middle" font-family="'Syne',sans-serif" font-size="15" font-weight="800" fill="#2a5cff">Chains</text>
+              </g>
+            </svg>
+        </div>
+        <div class="sdemo-descs">
+          <div class="sdemo-desc">
+            <div class="sdemo-desc-name">Ingest</div>
+            <div class="sdemo-desc-text">Parses Bandit, ZAP, npm audit &amp; osv-scanner outputs into normalized Finding objects.</div>
+          </div>
+          <div class="sdemo-desc">
+            <div class="sdemo-desc-name">Deduplicate</div>
+            <div class="sdemo-desc-text">Removes findings with identical CWE + location across tools, keeping highest severity.</div>
+          </div>
+          <div class="sdemo-desc">
+            <div class="sdemo-desc-name">Cluster</div>
+            <div class="sdemo-desc-text">Gemini assigns each finding to one of 7 attack surface categories.</div>
+          </div>
+          <div class="sdemo-desc">
+            <div class="sdemo-desc-name">Synthesize</div>
+            <div class="sdemo-desc-text">Gemini builds named attack chains spanning multiple surfaces with business impact.</div>
+          </div>
+          <div class="sdemo-desc">
+            <div class="sdemo-desc-name">MITRE Map</div>
+            <div class="sdemo-desc-text">Gemini assigns ATT&amp;CK techniques per chain with confidence scores &amp; fix priority.</div>
+          </div>
+          <div class="sdemo-desc sdemo-desc-out">
+            <div class="sdemo-desc-name">Output</div>
+            <div class="sdemo-desc-text">Prioritized attack chains ready for developer remediation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6 — ANY QUESTIONS -->
+  <div class="slide" id="s5">
+    <div class="sq-body">
+      <img src="clara1.png" alt="CLARA" class="sq-logo">
+      <div class="sq-headline">Any <span>Questions?</span></div>
+      <div class="sq-sub">Team CLARA &nbsp;·&nbsp; Hook'em Hacks 2026</div>
+      <div class="sq-badges">
+        <span class="badge b-ibm">IBM Security Track</span>
+        <span class="badge b-google">Best Gemini API</span>
+        <span class="badge b-startup">Most Startup Ready</span>
+        <span class="badge b-domain">Best Domain Name</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div id="slide-num">01 / 06</div>
+<div id="nav-wrap"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const navWrap = document.getElementById('nav-wrap');
+const slideNum = document.getElementById('slide-num');
+let cur = 0, chaosGoing = false, chaosDone = false, chaosTimer = null;
+let lineCount = 0, lineIdx = 0, delayIdx = 0;
+
+slides.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='ndot'+(i===0?' on':'');
+  d.onclick=()=>go(i);
+  navWrap.appendChild(d);
+});
+
+const LINES=[
+  // ── BANDIT ──────────────────────────────────────────
+  {c:'rl-bandit',t:'[bandit] Run started: 2024-01-15 09:23:41.482376'},
+  {c:'rl-bandit',t:'[bandit] Scanning: ./src  (3,462 lines of Python)'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B602:subprocess_popen_with_shell_equals_true] subprocess call with shell=True identified, security issue.'},
+  {c:'rl-bandit',t:'   Severity: High   Confidence: High   CWE: CWE-78 (OS Command Injection)'},
+  {c:'rl-bandit',t:'   Location: ./src/views.py:88:4'},
+  {c:'rl-bandit',t:'   85\tdef run_diagnostic(cmd):'},
+  {c:'rl-bandit',t:'   86\t    # run user-provided command'},
+  {c:'rl-bandit',t:'   88\t    subprocess.Popen(user_input, shell=True)'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection via string-based query construction.'},
+  {c:'rl-bandit',t:'   Severity: High   Confidence: Medium   CWE: CWE-89 (SQL Injection)'},
+  {c:'rl-bandit',t:'   Location: ./src/auth.py:42:4'},
+  {c:'rl-bandit',t:'   42\t    cursor.execute("SELECT * FROM users WHERE name=\'" + username + "\'")" '},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B303:use_of_md5] Use of MD5 does not provide security against collision and length extension attacks.'},
+  {c:'rl-bandit',t:'   Severity: Medium   Confidence: High   CWE: CWE-327 (Use of Broken Algorithm)'},
+  {c:'rl-bandit',t:'   Location: ./src/password_utils.py:61:15'},
+  {c:'rl-bandit',t:'   61\t    hashed = hashlib.md5(password.encode()).hexdigest()'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:">> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'super_secret_key_12345'"},
+  {c:'rl-bandit',t:'   Severity: Low   Confidence: Medium   CWE: CWE-259 (Use of Hard-coded Password)'},
+  {c:'rl-bandit',t:'   Location: ./src/settings.py:14'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B201:flask_debug_true] A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger.'},
+  {c:'rl-bandit',t:'   Severity: High   Confidence: Medium   CWE: CWE-94'},
+  {c:'rl-bandit',t:'   Location: ./src/app.py:3'},
+  {c:'rl-bandit',t:'   3\t    app.run(debug=True, host="0.0.0.0")'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B320:xml_bad_cElementTree] Using xml.etree.cElementTree to parse untrusted XML data is known to be vulnerable to XML attacks.'},
+  {c:'rl-bandit',t:'   Severity: Medium   Confidence: High   CWE: CWE-611 (XXE)'},
+  {c:'rl-bandit',t:'   Location: ./src/parser.py:103'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B106:hardcoded_password_funcarg] Possible hardcoded password: \'admin123\' passed as argument.'},
+  {c:'rl-bandit',t:'   Severity: Low   Confidence: Medium'},
+  {c:'rl-bandit',t:'   Location: ./tests/test_utils.py:27'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B501:request_with_no_cert_validation] Requests call with verify=False disabling SSL certificate checks.'},
+  {c:'rl-bandit',t:'   Severity: High   Confidence: High   CWE: CWE-295 (Improper Certificate Validation)'},
+  {c:'rl-bandit',t:'   Location: ./src/api_client.py:55'},
+  {c:'rl-bandit',t:'   55\t    resp = requests.get(url, verify=False, timeout=30)'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'>> Issue: [B108:probable_insecure_usage_of_temp_file] Probable insecure usage of temp file/directory.'},
+  {c:'rl-bandit',t:'   Severity: Medium   Confidence: Medium'},
+  {c:'rl-bandit',t:'   Location: ./src/upload_handler.py:19'},
+  {c:'rl-blank',t:''},
+  {c:'rl-bandit',t:'Code scanned:'},
+  {c:'rl-bandit',t:'  Total lines of code: 3462'},
+  {c:'rl-bandit',t:'  Total issues (by severity):'},
+  {c:'rl-bandit',t:'    Undefined: 0  Low: 3  Medium: 8  High: 6  Critical: 2'},
+  {c:'rl-blank',t:''},
+  // ── ZAP ──────────────────────────────────────────
+  {c:'rl-zap',t:'[zap] OWASP ZAP Full Scan starting against: https://juice-shop.local'},
+  {c:'rl-zap',t:'[zap] Crawling target... found 47 URLs'},
+  {c:'rl-zap',t:'[zap] Active scanning in progress...'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'PASS-NEW: 0   WARN-NEW: 18   FAIL-NEW: 0'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: Cross-Domain Misconfiguration [10098] x 3   (Risk: High)'},
+  {c:'rl-zap',t:'  Evidence: Access-Control-Allow-Origin: *  with  Access-Control-Allow-Credentials: true'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/rest/user/login'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/api/products/search'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/rest/basket/1'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: Content Security Policy (CSP) Header Not Set [10038] x 11   (Risk: Medium)'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/login'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/register'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/basket'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/administration'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: Anti-CSRF Tokens Scanner [20012] x 4   (Risk: Medium)'},
+  {c:'rl-zap',t:'  POST https://juice-shop.local/rest/user/login'},
+  {c:'rl-zap',t:'  POST https://juice-shop.local/rest/user/register'},
+  {c:'rl-zap',t:'  POST https://juice-shop.local/api/feedbacks'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: Server Leaks Version Information via "Server" HTTP Response Header [10036] x 11   (Risk: Low)'},
+  {c:'rl-zap',t:'  Evidence: Server: Express'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: Backup File Disclosure [10095] x 2   (Risk: Medium)'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/ftp/package.json.bak'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/ftp/eastere.gg'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: Timestamp Disclosure - Unix [10096] x 156   (Risk: Low)'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: X-Content-Type-Options Header Missing [10021] x 11   (Risk: Low)'},
+  {c:'rl-zap',t:'WARN-NEW: X-Frame-Options Header Not Set [10020] x 11   (Risk: Medium)'},
+  {c:'rl-zap',t:'WARN-NEW: Strict-Transport-Security Header Not Set [10035] x 11   (Risk: Low)'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: Session Cookie No HttpOnly Flag [10010] x 1   (Risk: Medium)'},
+  {c:'rl-zap',t:'  Evidence: Set-Cookie: token=eyJh...; Path=/; Expires=Wed, 15 Jan 2025'},
+  {c:'rl-blank',t:''},
+  {c:'rl-zap',t:'WARN-NEW: 403 Bypass [40038] x 1   (Risk: High)'},
+  {c:'rl-zap',t:'  URL: https://juice-shop.local/administration  (POST bypasses 403 returned on GET)'},
+  {c:'rl-blank',t:''},
+  // ── NPM AUDIT ──────────────────────────────────────────
+  {c:'rl-npm',t:'$ npm audit --json | npm audit'},
+  {c:'rl-blank',t:''},
+  {c:'rl-npm',t:'# npm audit report'},
+  {c:'rl-blank',t:''},
+  {c:'rl-npm',t:'crypto-js  <4.2.0'},
+  {c:'rl-npm',t:'Severity: critical'},
+  {c:'rl-npm',t:'crypto-js PBKDF2 1,000 times weaker than specified in 1993 and 1.3M times weaker than current standard'},
+  {c:'rl-npm',t:'https://github.com/advisories/GHSA-xwcq-pm8m-c4vf'},
+  {c:'rl-npm',t:'fix available via `npm audit fix --force`'},
+  {c:'rl-npm',t:'Will install crypto-js@4.2.0, which is a breaking change'},
+  {c:'rl-npm',t:'node_modules/crypto-js'},
+  {c:'rl-blank',t:''},
+  {c:'rl-npm',t:'jsonwebtoken  <=8.5.1'},
+  {c:'rl-npm',t:'Severity: critical'},
+  {c:'rl-npm',t:'jsonwebtoken vulnerable to signature validation bypass due to weak key confusion'},
+  {c:'rl-npm',t:'https://github.com/advisories/GHSA-c7hr-j4mq-35hh'},
+  {c:'rl-npm',t:'No fix available'},
+  {c:'rl-npm',t:'node_modules/jsonwebtoken'},
+  {c:'rl-blank',t:''},
+  {c:'rl-npm',t:'jsonwebtoken  *'},
+  {c:'rl-npm',t:'Severity: critical'},
+  {c:'rl-npm',t:'Unrestricted key type could lead to algorithm confusion attack'},
+  {c:'rl-npm',t:'https://github.com/advisories/GHSA-hjrf-2m68-5959'},
+  {c:'rl-npm',t:'No fix available'},
+  {c:'rl-npm',t:'node_modules/jsonwebtoken'},
+  {c:'rl-blank',t:''},
+  {c:'rl-npm',t:'lodash  <=4.17.20'},
+  {c:'rl-npm',t:'Severity: high'},
+  {c:'rl-npm',t:'Prototype Pollution in lodash via _.merge, _.mergeWith, _.defaultsDeep'},
+  {c:'rl-npm',t:'https://github.com/advisories/GHSA-p6mc-m468-83gw'},
+  {c:'rl-npm',t:'fix available via `npm audit fix`'},
+  {c:'rl-npm',t:'node_modules/lodash'},
+  {c:'rl-blank',t:''},
+  {c:'rl-npm',t:'semver  <5.7.2'},
+  {c:'rl-npm',t:'Severity: moderate'},
+  {c:'rl-npm',t:'semver vulnerable to Regular Expression Denial of Service (ReDoS)'},
+  {c:'rl-npm',t:'https://github.com/advisories/GHSA-c2qf-rxjj-qqgw'},
+  {c:'rl-npm',t:'fix available via `npm audit fix`'},
+  {c:'rl-npm',t:'node_modules/semver'},
+  {c:'rl-blank',t:''},
+  {c:'rl-npm',t:'tough-cookie  <4.1.3'},
+  {c:'rl-npm',t:'Severity: moderate'},
+  {c:'rl-npm',t:'Prototype Pollution in tough-cookie'},
+  {c:'rl-npm',t:'https://github.com/advisories/GHSA-72xf-g2v4-qvf3'},
+  {c:'rl-npm',t:'fix available via `npm audit fix --force`'},
+  {c:'rl-npm',t:'node_modules/tough-cookie'},
+  {c:'rl-blank',t:''},
+  {c:'rl-err',t:'11 vulnerabilities (3 moderate, 1 high, 4 critical, 3 informational)'},
+  {c:'rl-err',t:'To address all issues (including breaking changes), run:  npm audit fix --force'},
+  {c:'rl-blank',t:''},
+  // ── OSV SCANNER ──────────────────────────────────────────
+  {c:'rl-osv',t:'[osv-scanner] Scanning /app/requirements.txt against OSV database...'},
+  {c:'rl-osv',t:'[osv-scanner] 847 packages checked'},
+  {c:'rl-blank',t:''},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| ID        | CVSS             | Ecosystem  | Package       | Version                      |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| CVE-2019  | 9.8 CRITICAL     | PyPI       | PyYAML        | 5.3.1                        |'},
+  {c:'rl-osv',t:'| -20477    | (AV:N/AC:L)      |            |               | Fixed in: 5.4                |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| CVE-2023  | 7.5 HIGH         | PyPI       | Django        | 4.2.1  (65 CVEs total)       |'},
+  {c:'rl-osv',t:'| -41164    | (AV:N/AC:L)      |            |               | Fixed in: 4.2.5              |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| CVE-2023  | 7.5 HIGH         | PyPI       | Django        | 4.2.1                        |'},
+  {c:'rl-osv',t:'| -43665    | (AV:N/AC:L)      |            |               | Denial-of-service            |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| CVE-2023  | 5.9 MEDIUM       | PyPI       | pycryptodomex | 3.19.0                       |'},
+  {c:'rl-osv',t:'| -52323    | (AV:N/AC:H)      |            |               | Timing side-channel          |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| CVE-2024  | 8.8 HIGH         | PyPI       | Werkzeug      | 2.3.6                        |'},
+  {c:'rl-osv',t:'| -34069    | (AV:N/AC:L)      |            |               | Path traversal               |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| CVE-2024  | 5.3 MEDIUM       | PyPI       | setuptools    | 68.0.0                       |'},
+  {c:'rl-osv',t:'| -6345     | (AV:N/AC:L)      |            |               | ReDoS via version string     |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-osv',t:'| CVE-2023  | 7.5 HIGH         | PyPI       | requests      | 2.28.1                       |'},
+  {c:'rl-osv',t:'| -32681    | (AV:N/AC:L)      |            |               | Proxy auth leak via redirect |'},
+  {c:'rl-osv',t:'+-----------+------------------+------------+---------------+------------------------------+'},
+  {c:'rl-blank',t:''},
+  {c:'rl-err',t:'[osv-scanner] Found 22 vulnerabilities matching 9 packages in /app/requirements.txt'},
+  {c:'rl-err',t:'[osv-scanner] Critical: 1  High: 4  Medium: 3  Low: 0'},
+  {c:'rl-blank',t:''},
+  {c:'rl-err',t:'──────────────────────────────────────────────────────────────────────────'},
+  {c:'rl-err',t:'SCAN COMPLETE  ·  72 total findings  ·  4 tools  ·  3 targets analyzed'},
+  {c:'rl-err',t:'──────────────────────────────────────────────────────────────────────────'},
+];
+
+// slow start so judges can read, then accelerates into chaos
+const DELAYS=[500,480,460,440,420,400,380,360,340,320,300,280,260,240,220,200,180,165,150,138,126,115,105,96,88,80,73,67,61,55,50,46,42,38,34,31,28,25,22,20,18,16,14,12,11,10,9,8,7,6,6,5,5,5,4,4,4,4,3,3,3,3,3,3,3,3,3,3,3,3];
+
+let userScrolled = false;
+
+function addLine(){
+  const feed=document.getElementById('raw-chaos-feed');
+  if(!feed||chaosDone)return;
+  if(lineIdx>=LINES.length){freeze();return;}
+  const item=LINES[lineIdx];
+  lineIdx++;lineCount++;
+  const div=document.createElement('div');
+  div.className='raw-line '+item.c;
+  div.textContent=item.t;
+  feed.appendChild(div);
+  // only auto-scroll if user hasn't manually scrolled up
+  if(!userScrolled) feed.scrollTop=feed.scrollHeight;
+  const lc=document.getElementById('line-count');
+  if(lc)lc.textContent=lineCount;
+  const ov=document.getElementById('s1-overlay');
+  if(ov&&lineIdx>LINES.length*0.65){
+    ov.style.background=`rgba(224,32,32,${Math.min((lineIdx-LINES.length*0.65)/(LINES.length*0.35)*0.12,0.12)})`;
+  }
+  const d=DELAYS[Math.min(delayIdx,DELAYS.length-1)];
+  delayIdx++;
+  chaosTimer=setTimeout(addLine,d);
+}
+
+function startChaos(){
+  if(chaosGoing||chaosDone)return;
+  chaosGoing=true;
+  userScrolled=false;
+  const p=document.getElementById('s1-prompt');
+  if(p)p.style.display='none';
+  // listen for user scrolling up during animation
+  const feed=document.getElementById('raw-chaos-feed');
+  if(feed){
+    feed.addEventListener('scroll',()=>{
+      const atBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<40;
+      userScrolled=!atBottom;
+    });
+  }
+  addLine();
+}
+
+function freeze(){
+  chaosDone=true;clearTimeout(chaosTimer);
+  const feed=document.getElementById('raw-chaos-feed');
+  if(feed){feed.style.overflowY='scroll';feed.style.justifyContent='flex-start';feed.style.paddingTop='16px';}
+  // Phase 1: stats card fades in
+  const f=document.getElementById('s1-frozen');
+  if(f){f.style.display='block';requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.opacity='1';}));}
+  // Phase 2: fade out stats card after 2.2s
+  setTimeout(()=>{
+    if(f)f.style.opacity='0';
+    setTimeout(()=>{if(f)f.style.display='none';},600);
+  },2200);
+  // Phase 3: question fades in alone at 2.9s
+  setTimeout(()=>{
+    const q=document.getElementById('s1-frozen-q');
+    if(q){q.style.display='flex';requestAnimationFrame(()=>requestAnimationFrame(()=>{q.style.opacity='1';}));}
+  },2900);
+}
+
+function resetChaos(){
+  chaosGoing=false;chaosDone=false;lineCount=0;lineIdx=0;delayIdx=0;userScrolled=false;
+  clearTimeout(chaosTimer);
+  const feed=document.getElementById('raw-chaos-feed');
+  if(feed){
+    const keep=['s1-prompt','s1-frozen','s1-frozen-q'];
+    Array.from(feed.children).forEach(c=>{if(!keep.includes(c.id))feed.removeChild(c);});
+    feed.style.overflowY='hidden';
+    feed.style.justifyContent='flex-end';
+    feed.style.paddingTop='16px';
+    feed.scrollTop=0;
+  }
+  const p=document.getElementById('s1-prompt');if(p)p.style.display='flex';
+  const f=document.getElementById('s1-frozen');if(f){f.style.display='none';f.style.opacity='0';}
+  const q=document.getElementById('s1-frozen-q');if(q){q.style.display='none';q.style.opacity='0';}
+  const ov=document.getElementById('s1-overlay');if(ov)ov.style.background='rgba(224,32,32,0)';
+  const lc=document.getElementById('line-count');if(lc)lc.textContent='0';
+}
+
+const RAW_PREVIEW=[
+  '{ "tool": "bandit", "generated": "2024-01-15T09:23:41Z",',
+  '  "results": [',
+  '    { "test_id": "B106", "severity": "HIGH", "confidence": "HIGH",',
+  '      "filename": "auth/jwt_handler.py", "line_number": 87,',
+  '      "issue_text": "jwt.decode() called without algorithm verification" },',
+  '    { "test_id": "B105", "severity": "MEDIUM",',
+  '      "filename": "config/settings.py", "line_number": 14,',
+  '      "issue_text": "Hardcoded JWT secret key detected" },',
+  '    { "test_id": "B701", "severity": "HIGH",',
+  '      "filename": "middleware/cors.py", "line_number": 23,',
+  '      "issue_text": "CORS origin wildcard — all domains allowed" },',
+  '    { "test_id": "B108", "severity": "MEDIUM",',
+  '      "filename": "static/backup/.env.bak", "line_number": 1,',
+  '      "issue_text": "Sensitive backup file exposed in static dir" }',
+  '  ] }',
+  '--- ZAP ACTIVE SCAN ---',
+  '[HIGH]   JWT Secret Brute-Forceable      /api/auth/login',
+  '[HIGH]   CORS Misconfiguration           Access-Control-Allow-Origin: *',
+  '[MEDIUM] Backup File Disclosure          GET /.env.bak → 200 OK',
+  '[LOW]    Server Version Leak             X-Powered-By: Express 4.18.1',
+  '--- NPM AUDIT ---',
+  'jsonwebtoken  <=8.5.1  CRITICAL  CVE-2022-23529  alg:none bypass',
+  'lodash        <4.17.21  HIGH     CVE-2021-23337  Prototype Pollution',
+  'word-wrap     <1.2.4    HIGH     CVE-2023-26115  ReDoS',
+  '--- OSV SCANNER ---',
+  '[CVE-2022-23529]  9.8 CRITICAL  jsonwebtoken 8.5.1',
+  '[CVE-2021-23337]  7.5 HIGH      lodash 4.17.20',
+  '[CVE-2023-26115]  7.5 HIGH      word-wrap 1.2.3',
+  '72 findings total across 4 tools — 0 prioritized',
+];
+
+function animatePipeline(){
+  const nodes=['pn1','pn2','pn3','pn4','pn5','pn6'];
+  const lines=['pl1','pl2','pl3','pl4','pl5'];
+  nodes.forEach(id=>{const el=document.getElementById(id);if(el)el.setAttribute('opacity','0');});
+  lines.forEach(id=>{const el=document.getElementById(id);if(el)el.setAttribute('opacity','0');});
+  nodes.forEach((id,i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById(id);
+      if(el){
+        el.style.transition='opacity 0.35s ease';
+        el.setAttribute('opacity','1');
+      }
+      if(i<lines.length){
+        setTimeout(()=>{
+          const ln=document.getElementById(lines[i]);
+          if(ln) ln.setAttribute('opacity','1');
+        },180);
+      }
+    }, i*280);
+  });
+}
+
+function go(n){
+  slides[cur].classList.remove('active');
+  cur=(n+slides.length)%slides.length;
+  slides[cur].classList.add('active');
+  document.querySelectorAll('.ndot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+  slideNum.textContent=String(cur+1).padStart(2,'0')+' / 06';
+  if(cur===1)resetChaos();
+  if(cur===2){
+    ['cc1','cc2','cc3'].forEach(id=>{const c=document.getElementById(id);if(c)c.classList.remove('vis');});
+    const rs=document.getElementById('raw-scroll');
+    if(rs)rs.innerHTML=RAW_PREVIEW.map((l,i)=>
+      `<div class="${i%4===0?'rl-b':''}" style="margin-bottom:4px;word-break:break-all;">${l}</div>`
+    ).join('');
+    setTimeout(()=>{const c=document.getElementById('cc1');if(c)c.classList.add('vis');},200);
+    setTimeout(()=>{const c=document.getElementById('cc2');if(c)c.classList.add('vis');},650);
+    setTimeout(()=>{const c=document.getElementById('cc3');if(c)c.classList.add('vis');},1100);
+  }
+  if(cur===4){
+    setTimeout(animatePipeline, 300);
+  }
+}
+
+document.getElementById('s1').addEventListener('click',()=>{if(cur===1)startChaos();});
+document.addEventListener('keydown',e=>{
+  if(cur===1&&(e.key===' '||e.key==='Enter')){e.preventDefault();startChaos();return;}
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(cur+1);}
+  if(e.key==='ArrowLeft'){e.preventDefault();go(cur-1);}
+});
+</script>
+</body>
+</html>
