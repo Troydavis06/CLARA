@@ -28,7 +28,8 @@ def _merge_chains(chains: list[dict], scored_chains: list[dict], findings: list[
             "blast_radius_notes": s.get("blast_radius_notes", ""),
             "locations": loc_set,
         })
-    return sorted(merged, key=lambda x: x["fix_priority"])
+    _sev_rank = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    return sorted(merged, key=lambda x: (_sev_rank.get(x.get("severity", "low"), 3), x["fix_priority"]))
 
 
 def _build_stats(findings: list[dict], dedup_stats: dict) -> dict:
