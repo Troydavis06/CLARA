@@ -1,0 +1,99 @@
+{
+  "alerts": [
+    {
+      "name": "Backup File Disclosure",
+      "riskcode": "2",
+      "confidence": "2",
+      "riskdesc": "Medium (Medium)",
+      "solution": "<p>Do not edit files in-situ on the web server, and ensure that un-necessary files (including hidden files) are removed from the web server.</p>",
+      "cweid": "530",
+      "wascid": "34"
+    },
+    {
+      "name": "Bypassing 403",
+      "riskcode": "2",
+      "confidence": "2",
+      "riskdesc": "Medium (Medium)",
+      "solution": "",
+      "cweid": "348",
+      "wascid": "0"
+    },
+    {
+      "name": "CORS Misconfiguration",
+      "riskcode": "2",
+      "confidence": "3",
+      "riskdesc": "Medium (High)",
+      "solution": "<p>If a web resource contains sensitive information, the origin should be properly specified in the Access-Control-Allow-Origin header. Only trusted websites needing this resource should be specified in this header, with the most secured protocol supported.</p>",
+      "cweid": "942",
+      "wascid": "14"
+    },
+    {
+      "name": "Content Security Policy (CSP) Header Not Set",
+      "riskcode": "2",
+      "confidence": "3",
+      "riskdesc": "Medium (High)",
+      "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header.</p>",
+      "cweid": "693",
+      "wascid": "15"
+    },
+    {
+      "name": "Cross-Domain Misconfiguration",
+      "riskcode": "2",
+      "confidence": "2",
+      "riskdesc": "Medium (Medium)",
+      "solution": "<p>Ensure that sensitive data is not available in an unauthenticated manner (using IP address white-listing, for instance).</p><p>Configure the \"Access-Control-Allow-Origin\" HTTP header to a more restrictive set of domains, or remove all CORS headers entirely, to allow the web browser to enforce the Same Origin Policy (SOP) in a more restrictive manner.</p>",
+      "cweid": "264",
+      "wascid": "14"
+    },
+    {
+      "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that the application/web server sets the Cross-Origin-Embedder-Policy header appropriately, and that it sets the Cross-Origin-Embedder-Policy header to 'require-corp' for documents.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that supports the Cross-Origin-Embedder-Policy header (https://caniuse.com/mdn-http_headers_cross-origin-embedder-policy).</p>",
+      "cweid": "693",
+      "wascid": "14"
+    },
+    {
+      "name": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that the application/web server sets the Cross-Origin-Opener-Policy header appropriately, and that it sets the Cross-Origin-Opener-Policy header to 'same-origin' for documents.</p><p>'same-origin-allow-popups' is considered as less secured and should be avoided.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that supports the Cross-Origin-Opener-Policy header (https://caniuse.com/mdn-http_headers_cross-origin-opener-policy).</p>",
+      "cweid": "693",
+      "wascid": "14"
+    },
+    {
+      "name": "Dangerous JS Functions",
+      "riskcode": "1",
+      "confidence": "1",
+      "riskdesc": "Low (Low)",
+      "solution": "<p>See the references for security advice on the use of these functions.</p>",
+      "cweid": "749",
+      "wascid": "-1"
+    },
+    {
+      "name": "Deprecated Feature Policy Header Set",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Permissions-Policy header instead of the Feature-Policy header.</p>",
+      "cweid": "16",
+      "wascid": "15"
+    },
+    {
+      "name": "Timestamp Disclosure - Unix",
+      "riskcode": "1",
+      "confidence": "1",
+      "riskdesc": "Low (Low)",
+      "solution": "<p>Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.</p>",
+      "cweid": "497",
+      "wascid": "13"
+    }
+  ],
+  "_meta": {
+    "tool": "zap",
+    "source": "juice-shop",
+    "scan_type": "full-scan"
+  }
+}
