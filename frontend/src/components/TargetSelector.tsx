@@ -27,13 +27,14 @@ const TARGETS: Target[] = [
   },
 ];
 
-type Props = { value: string; onChange: (v: string) => void; disabled?: boolean };
+type Props = { value: string; onChange: (v: string) => void; disabled?: boolean; scannedTargets?: Set<string> };
 
-export default function TargetSelector({ value, onChange, disabled }: Props) {
+export default function TargetSelector({ value, onChange, disabled, scannedTargets }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {TARGETS.map((t) => {
         const selected = value === t.id;
+        const scanned = scannedTargets?.has(t.id) ?? false;
         return (
           <button
             key={t.id}
@@ -46,17 +47,25 @@ export default function TargetSelector({ value, onChange, disabled }: Props) {
                 : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 text-gray-700 disabled:opacity-40"
               }`}
           >
-            {/* Selection indicator */}
-            {selected && (
-              <div className="absolute top-3 right-3">
+            {/* Top-right indicators */}
+            <div className="absolute top-3 right-3 flex items-center gap-1.5">
+              {scanned && !selected && (
+                <div className="w-5 h-5 rounded-full bg-green-100 border border-green-300
+                  flex items-center justify-center" title="Scan cached">
+                  <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+              )}
+              {selected && (
                 <div className="w-5 h-5 rounded-full bg-blue-100 border border-blue-300
                   flex items-center justify-center">
                   <svg className="w-3 h-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Content */}
             <div className="relative">

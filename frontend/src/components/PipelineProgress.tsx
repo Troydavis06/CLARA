@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { StepEvent } from "../App";
 
 const STEPS = [
@@ -9,6 +10,59 @@ const STEPS = [
   { key: "report",           label: "Report",    icon: "📋", desc: "Generate report" },
 ];
 
+const SEV_COLORS: Record<string, string> = {
+  critical: "bg-red-50 border-red-200 text-red-700",
+  high:     "bg-orange-50 border-orange-200 text-orange-700",
+  medium:   "bg-yellow-50 border-yellow-200 text-yellow-700",
+  low:      "bg-blue-50 border-blue-200 text-blue-700",
+};
+const SEV_DOT: Record<string, string> = {
+  critical: "bg-red-500",
+  high:     "bg-orange-400",
+  medium:   "bg-yellow-400",
+  low:      "bg-blue-400",
+};
+
+function SynthChainCard({ event, isLatest }: { event: StepEvent; isLatest: boolean }) {
+  const [displayed, setDisplayed] = useState("");
+  const text = event.narrative_preview ?? "";
+  const sev = event.severity ?? "high";
+
+  useEffect(() => {
+    if (!text) return;
+    setDisplayed("");
+    let i = 0;
+    const speed = 8; // ms per char
+    const timer = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) clearInterval(timer);
+    }, speed);
+    return () => clearInterval(timer);
+  }, [text]);
+
+  const sevClass = SEV_COLORS[sev] ?? SEV_COLORS.high;
+  const dotClass = SEV_DOT[sev] ?? SEV_DOT.high;
+
+  return (
+    <div className={`rounded-xl border p-3 ${sevClass} transition-all duration-300`}>
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${dotClass} ${isLatest ? "animate-pulse" : ""}`} />
+        <span className="text-[11px] font-bold tracking-wide">{event.name}</span>
+        <span className={`ml-auto text-[9px] uppercase tracking-widest font-semibold px-1.5 py-0.5 rounded border ${sevClass}`}>
+          {sev}
+        </span>
+      </div>
+      <p className="text-[11px] leading-relaxed opacity-80 line-clamp-3">
+        {displayed}
+        {isLatest && displayed.length < text.length && (
+          <span className="inline-block w-1.5 h-3.5 bg-current ml-0.5 opacity-70 animate-pulse" />
+        )}
+      </p>
+    </div>
+  );
+}
+
 type Props = { steps: StepEvent[]; running: boolean };
 
 export default function PipelineProgress({ steps, running }: Props) {
@@ -17,9 +71,6 @@ export default function PipelineProgress({ steps, running }: Props) {
   );
   const activeStep = steps.findLast((e) => e.type === "step_start")?.step;
   const synthChains = steps.filter((e) => e.type === "chain_preview");
-  const synthNarrative = synthChains
-    .map((e) => `[${e.name}] ${e.narrative_preview}`)
-    .join("\n\n");
 
   const summaries: Record<string, string> = {};
   for (const e of steps) {
@@ -129,22 +180,59 @@ export default function PipelineProgress({ steps, running }: Props) {
         })}
       </div>
 
-      {/* Live synthesis streaming */}
-      {synthNarrative && (
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            <span className="text-[10px] text-gray-600 uppercase tracking-widest">
-              Synthesizing Attack Chains
-            </span>
-          </div>
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-[11px] text-gray-700
-                          font-mono leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap">
-            {synthNarrative}
-            {running && activeStep === "synthesize" && (
-              <span className="inline-block w-2 h-4 bg-blue-500 ml-0.5 animate-pulse" />
-            )}
-          </div>
+      {/* Live synthesis + MITRE section — hidden once mitre_prioritize is done */}
+      {synthChains.length > 0 && !completedSteps.has("mitre_prioritize") && (
+        <div className="mt-2 space-y-3">
+          {/* Synthesis cards */}
+          {(activeStep === "synthesize" || completedSteps.has("synthesize")) && (
+            <>
+              <div className="flex items-center gap-2">
+                {running && activeStep === "synthesize" ? (
+                  <span className="flex gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style={{animationDelay:"0ms"}} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style={{animationDelay:"150ms"}} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" style={{animationDelay:"300ms"}} />
+                  </span>
+                ) : (
+                  <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                )}
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">
+                  {running && activeStep === "synthesize" ? "Building attack chains…" : `${synthChains.length} attack chains identified`}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {synthChains.map((e, idx) => (
+                  <SynthChainCard key={e.chain_id ?? idx} event={e} isLatest={idx === synthChains.length - 1 && activeStep === "synthesize"} />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* MITRE mapping animation — shown once synthesize is done */}
+          {completedSteps.has("synthesize") && (
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-purple-50 border border-purple-100">
+              <div className="mt-0.5 shrink-0">
+                {completedSteps.has("mitre_prioritize") ? (
+                  <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 text-purple-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
+                    <path d="M12 2a10 10 0 019.95 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                )}
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold text-purple-800">Mapping to MITRE ATT&CK</p>
+                <p className="text-[10px] text-purple-600 mt-0.5">
+                  Scoring each chain against known adversary techniques, assigning tactics and CVE correlations…
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

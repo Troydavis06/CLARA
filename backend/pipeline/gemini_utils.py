@@ -49,6 +49,7 @@ def _gemini_generate(client, model: str, prompt: str, system: str, temperature: 
             system_instruction=system,
             response_mime_type="application/json",
             temperature=temperature,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
     return resp.text

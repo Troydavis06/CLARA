@@ -24,6 +24,9 @@ function AnimatedCounter({ value, duration = 1200 }: { value: number; duration?:
 type Props = { report: Report };
 
 export default function StatsPanel({ report }: Props) {
+  // Count chains with critical severity (findings themselves rarely get that label from scanners)
+  const criticalCount = report.chains?.filter((c) => c.severity === "critical").length ?? 0;
+
   const stats = [
     {
       label: "Total Findings",
@@ -37,6 +40,7 @@ export default function StatsPanel({ report }: Props) {
       iconBg: "bg-cyan-50 text-cyan-600",
       border: "border-cyan-200",
       glow: "hover:shadow-cyan-100",
+      pulse: false,
     },
     {
       label: "Duplicates Removed",
@@ -50,19 +54,7 @@ export default function StatsPanel({ report }: Props) {
       iconBg: "bg-yellow-50 text-yellow-600",
       border: "border-yellow-200",
       glow: "hover:shadow-yellow-100",
-    },
-    {
-      label: "Attack Chains",
-      value: report.stats.total_chains,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.193-9.193a4.5 4.5 0 016.364 6.364l-4.5 4.5a4.5 4.5 0 01-7.244-1.242" />
-        </svg>
-      ),
-      color: "text-red-600",
-      iconBg: "bg-red-50 text-red-600",
-      border: "border-red-200",
-      glow: "hover:shadow-red-100",
+      pulse: false,
     },
     {
       label: "Unique Findings",
@@ -76,6 +68,21 @@ export default function StatsPanel({ report }: Props) {
       iconBg: "bg-blue-50 text-blue-600",
       border: "border-blue-200",
       glow: "hover:shadow-blue-100",
+      pulse: false,
+    },
+    {
+      label: "Critical Chains",
+      value: criticalCount,
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      ),
+      color: "text-red-600",
+      iconBg: "bg-red-100 text-red-600",
+      border: "border-red-400",
+      glow: "hover:shadow-red-200",
+      pulse: criticalCount > 0,
     },
   ];
 
@@ -90,9 +97,15 @@ export default function StatsPanel({ report }: Props) {
           <div
             key={s.label}
             className={`bg-white rounded-xl p-4 ${s.border} border ${s.glow}
-              hover:shadow-md transition-all duration-300`}
+              hover:shadow-md transition-all duration-300 relative`}
             style={{ animationDelay: `${i * 0.1}s` }}
           >
+            {s.pulse && (
+              <span className="absolute top-3 right-3 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+              </span>
+            )}
             <div className="flex items-center gap-2 mb-3">
               <div className={`w-8 h-8 rounded-lg ${s.iconBg} flex items-center justify-center`}>
                 {s.icon}

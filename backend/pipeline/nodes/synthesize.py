@@ -64,9 +64,23 @@ def _build_clusters_with_findings(clusters: dict, findings: list[dict]) -> dict:
     return result
 
 
+def _fix_clusters_spanned(chains: list[dict], clusters: dict, findings: list[dict]) -> None:
+    """Infer clusters_spanned from finding_ids when LLM omits/under-fills it."""
+    fid_to_cluster: dict[str, str] = {}
+    for surface, data in clusters.items():
+        for fid in data.get("finding_ids", []):
+            fid_to_cluster[fid] = surface
+    for c in chains:
+        spanned = c.get("clusters_spanned") or []
+        if len(spanned) < 2:
+            inferred = list({fid_to_cluster[fid] for fid in c.get("finding_ids", []) if fid in fid_to_cluster})
+            if len(inferred) >= 2:
+                c["clusters_spanned"] = inferred
+
+
 def _validate(chains: list[dict], finding_ids_set: set[str]) -> str | None:
-    if not (3 <= len(chains) <= 5):
-        return f"Expected 3-5 chains, got {len(chains)}"
+    if not (2 <= len(chains) <= 5):
+        return f"Expected 2-5 chains, got {len(chains)}"
     for c in chains:
         if len(c.get("clusters_spanned", [])) < 2:
             return f"Chain '{c.get('name')}' spans fewer than 2 clusters"
@@ -109,6 +123,7 @@ def run(state: dict) -> dict:
             return {**state, "error": "synthesize: invalid JSON", "current_step": "synthesize"}
 
         chains = result.get("chains", [])
+        _fix_clusters_spanned(chains, clusters, findings)
         error = _validate(chains, finding_ids_set)
         if error:
             if attempt == 0:

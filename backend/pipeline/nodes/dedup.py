@@ -24,12 +24,23 @@ def _sev_rank(sev: str) -> int:
 
 
 def _dedup_key(f: dict) -> tuple | None:
-    cwe = tuple(sorted(f.get("cwe") or []))
-    if not cwe:
-        return None  # no CWE → can't do semantic dedup, keep as-is
     category = _TOOL_CATEGORY.get(f["source_tool"], "OTHER")
     location = f.get("location", "")
-    return (cwe, location, category)
+    # For OSS findings, strip version from location so pkg@1.0 and pkg@2.0 match
+    if category == "OSS":
+        location = location.split("@")[0]
+    cwe = tuple(sorted(f.get("cwe") or []))
+    if cwe:
+        return ("cwe", cwe, location, category)
+    # Fallback: deduplicate by CVE when CWE is absent (common for OSS findings)
+    cve = f.get("cve") or ""
+    if cve:
+        return ("cve", cve, category)
+    # Last resort: title + location
+    title = f.get("title", "").lower().strip()
+    if title and location:
+        return ("title", title, location, category)
+    return None
 
 
 def run(state: dict) -> dict:

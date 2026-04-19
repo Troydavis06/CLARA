@@ -165,6 +165,38 @@
       "osv_id": "PYSEC-2023-192"
     },
     {
+      "_source": "juice-shop",
+      "_tool": "osv-scanner",
+      "package": "lodash",
+      "version": "4.17.20",
+      "severity": "high",
+      "cve": "GHSA-fvqr-27wr-82fm",
+      "title": "Prototype Pollution in lodash",
+      "cvss": 6.5,
+      "cwe": ["CWE-471", "CWE-1321"]
+    },
+    {
+      "_source": "juice-shop",
+      "_tool": "osv-scanner",
+      "package": "jsonwebtoken",
+      "version": "8.5.1",
+      "severity": "critical",
+      "cve": "GHSA-c7hr-j4mj-j2w6",
+      "title": "Verification Bypass in jsonwebtoken",
+      "cvss": 0,
+      "cwe": ["CWE-20"]
+    },
+    {
+      "_source": "pygoat",
+      "_tool": "osv-scanner",
+      "package": "requests",
+      "version": "2.27.0",
+      "severity": "medium",
+      "cve": "CVE-2023-32681",
+      "title": "Unintended leak of Proxy-Authorization header in requests",
+      "osv_id": "PYSEC-2023-74-alt"
+    },
+    {
       "_source": "impacket",
       "_tool": "osv-scanner",
       "package": "pygments",

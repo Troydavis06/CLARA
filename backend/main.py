@@ -23,6 +23,7 @@ from pydantic import BaseModel
 
 from pipeline.config import GOLDEN_DIR, TARGETS
 from pipeline.graph import get_graph
+from pipeline.llm_utils import generate_with_backoff
 
 app = FastAPI(title="CLARA API")
 
@@ -41,6 +42,40 @@ class AnalyzeRequest(BaseModel):
     target: str
     demo: bool = False
     uploaded_files: list[dict] | None = None
+
+
+class FixRequest(BaseModel):
+    chain_name: str
+    severity: str
+    narrative: str
+    business_impact: str | None = None
+    locations: list[str] | None = None
+
+
+@app.post("/suggest-fix")
+async def suggest_fix(req: FixRequest):
+    loc_text = "\n".join(f"  - {l}" for l in (req.locations or [])) or "  (location unknown)"
+    prompt = f"""A developer needs help fixing a security vulnerability in their application.
+
+Attack chain: {req.chain_name}
+Severity: {req.severity}
+Affected locations:
+{loc_text}
+Business impact: {req.business_impact or "not specified"}
+
+Attack path:
+{req.narrative}
+
+Provide a clear, practical remediation guide in plain English. Write for an average developer who understands code but may not be a security expert. Be specific about what to change and why. Keep it concise — 3-5 actionable bullet points followed by a brief summary sentence.
+
+Respond with JSON: {{"suggestion": "<your recommendation>"}}"""
+
+    result = generate_with_backoff(
+        prompt,
+        system="You are a helpful application security advisor. Give practical, developer-friendly remediation advice.",
+        temperature=0.3,
+    )
+    return json.loads(result)
 
 
 @app.get("/targets")

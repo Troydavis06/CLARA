@@ -98,6 +98,8 @@ def ingest_oss(vulns: list[dict], source_target: str) -> list[Finding]:
         cve_raw = v.get("cve", "") or ""
         cve = cve_raw if cve_raw.startswith(("CVE-", "GHSA-", "PYSEC-")) else None
         cwe_list = v.get("cwe", []) or []
+        version = v.get("version", "")
+        location = f"{pkg}@{version}" if version else pkg
         findings.append(Finding(
             id=f"{source_target}-{abbrev}-{idx:03d}",
             source_tool=tool,
@@ -105,7 +107,7 @@ def ingest_oss(vulns: list[dict], source_target: str) -> list[Finding]:
             title=v.get("title", pkg),
             description=f"{pkg}: {v.get('title', '')} (CVSS: {v.get('cvss') or 'N/A'})",
             severity=sev,
-            location=f"{pkg}@latest",
+            location=location,
             cwe=cwe_list,
             cve=cve,
         ))
