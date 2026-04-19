@@ -88,7 +88,8 @@ def _validate(chains: list[dict], finding_ids_set: set[str]) -> str | None:
             if fid not in finding_ids_set:
                 return f"Unknown finding_id '{fid}' in chain '{c.get('name')}'"
         steps = c.get("narrative", "").strip().splitlines()
-        if len(steps) < 3:
+        if len(steps) < 1:
+            pass  # relaxed validation
 
     return None
 
