@@ -359,8 +359,9 @@ export default function App() {
 
       {/* Body: sidebar + main + right sidebar */}
       <div className="flex flex-1 overflow-hidden">
-        {/* ── Left Sidebar ── */}
-        <aside className="w-56 bg-white border-r border-gray-200 flex flex-col shrink-0">
+        {/* ── Left Sidebar — slides in once agent has run ── */}
+        <aside className={`bg-white border-r border-gray-200 flex flex-col shrink-0 overflow-hidden transition-all duration-500 ease-in-out
+          ${running || steps.length > 0 || report ? "w-56" : "w-0"}`}>
           {/* Target selector */}
           <div className="p-4 border-b border-gray-200">
             <select
