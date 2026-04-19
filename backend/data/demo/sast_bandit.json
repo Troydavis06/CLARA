@@ -1,0 +1,231 @@
+{
+  "results": [
+    {
+      "code": "157 \n158                 sql_query = \"SELECT * FROM introduction_login WHERE user='\"+name+\"' AND password='\"+password+\"'\"\n159                 print(sql_query)\n",
+      "col_offset": 28,
+      "end_col_offset": 75,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/pygoat\\introduction\\views.py",
+      "issue_confidence": "LOW",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 158,
+      "line_range": [
+        158
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions",
+      "_source": "pygoat",
+      "_priority": 10
+    },
+    {
+      "code": "148                 eventFilter.CreatorSID =  [1, 2, 0, 0, 0, 0, 0, 5, 32, 0, 0, 0, 32, 2, 0, 0]\n149                 eventFilter.Query = 'select * from __TimerEvent where TimerID = \"TI_%s\" ' % self.__options.name\n150                 eventFilter.QueryLanguage = 'WQL'\n",
+      "col_offset": 36,
+      "end_col_offset": 89,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/impacket\\examples\\wmipersist.py",
+      "issue_confidence": "LOW",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 149,
+      "line_range": [
+        149
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions",
+      "_source": "impacket",
+      "_priority": 10
+    },
+    {
+      "code": "85             # Vulnerable: Predictable token generation\n86             token = hashlib.md5(f\"{email}:{datetime.now()}\".encode()).hexdigest()\n87             password_reset_tokens[token] = username\n",
+      "col_offset": 20,
+      "end_col_offset": 69,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/pygoat\\dockerized_labs\\broken_auth_lab\\app.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 327,
+        "link": "https://cwe.mitre.org/data/definitions/327.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "line_number": 86,
+      "line_range": [
+        86
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html",
+      "test_id": "B324",
+      "test_name": "hashlib",
+      "_source": "pygoat",
+      "_priority": 9
+    },
+    {
+      "code": "122 if __name__ == '__main__':\n123     app.run(host='0.0.0.0', port=5000, debug=True)  # Vulnerable: Debug mode enabled in production \n",
+      "col_offset": 4,
+      "end_col_offset": 50,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/pygoat\\dockerized_labs\\broken_auth_lab\\app.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 94,
+        "link": "https://cwe.mitre.org/data/definitions/94.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
+      "line_number": 123,
+      "line_range": [
+        123
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b201_flask_debug_true.html",
+      "test_id": "B201",
+      "test_name": "flask_debug_true",
+      "_source": "pygoat",
+      "_priority": 9
+    },
+    {
+      "code": "232 def command_out(command):\n233     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)\n234     return process.communicate()\n",
+      "col_offset": 14,
+      "end_col_offset": 99,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/pygoat\\introduction\\mitre.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "subprocess call with shell=True identified, security issue.",
+      "line_number": 233,
+      "line_range": [
+        233
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b602_subprocess_popen_with_shell_equals_true.html",
+      "test_id": "B602",
+      "test_name": "subprocess_popen_with_shell_equals_true",
+      "_source": "pygoat",
+      "_priority": 9
+    },
+    {
+      "code": "330     def do_shell(self, s):\n331         os.system(s)\n332         self.send_data('\\r\\n')\n",
+      "col_offset": 8,
+      "end_col_offset": 20,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/impacket\\examples\\goldenPac.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Starting a process with a shell, possible injection detected, security issue.",
+      "line_number": 331,
+      "line_range": [
+        331
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
+      "test_id": "B605",
+      "test_name": "start_process_with_a_shell",
+      "_source": "impacket",
+      "_priority": 9
+    },
+    {
+      "code": "1408 \n1409     md5 = hashlib.new('md5')\n1410     md5.update(sessionKey)\n",
+      "col_offset": 10,
+      "end_col_offset": 28,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/impacket\\impacket\\dcerpc\\v5\\drsuapi.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 327,
+        "link": "https://cwe.mitre.org/data/definitions/327.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "line_number": 1409,
+      "line_range": [
+        1409
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html",
+      "test_id": "B324",
+      "test_name": "hashlib",
+      "_source": "impacket",
+      "_priority": 9
+    },
+    {
+      "code": "122 if __name__ == '__main__':\n123     app.run(host='0.0.0.0', port=5000, debug=True)  # Vulnerable: Debug mode enabled in production \n",
+      "col_offset": 17,
+      "end_col_offset": 26,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/pygoat\\dockerized_labs\\broken_auth_lab\\app.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 605,
+        "link": "https://cwe.mitre.org/data/definitions/605.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible binding to all interfaces.",
+      "line_number": 123,
+      "line_range": [
+        123
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b104_hardcoded_bind_all_interfaces.html",
+      "test_id": "B104",
+      "test_name": "hardcoded_bind_all_interfaces",
+      "_source": "pygoat",
+      "_priority": 5
+    },
+    {
+      "code": "118 \n119         self.server = smbserver.SMBSERVER(('0.0.0.0',445), config_parser = smbConfig)\n120         self.server.processConfigFile()\n",
+      "col_offset": 43,
+      "end_col_offset": 52,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/impacket\\examples\\karmaSMB.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 605,
+        "link": "https://cwe.mitre.org/data/definitions/605.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible binding to all interfaces.",
+      "line_number": 119,
+      "line_range": [
+        119
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b104_hardcoded_bind_all_interfaces.html",
+      "test_id": "B104",
+      "test_name": "hardcoded_bind_all_interfaces",
+      "_source": "impacket",
+      "_priority": 5
+    },
+    {
+      "code": "86         command = (line.strip('\\n')+'\\x00').encode('utf-16le')\n87         command = ARC4.new(self.key).encrypt(command)\n88         resp = mimilib.hMimiCommand(self.dce, self.pHandle, command)\n",
+      "col_offset": 18,
+      "end_col_offset": 36,
+      "filename": "c:/Users/troyd/CLARA/CLARA/data/targets/impacket\\examples\\mimikatz.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 327,
+        "link": "https://cwe.mitre.org/data/definitions/327.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Use of insecure cipher Cryptodome.Cipher.ARC4.new. Replace with a known secure cipher such as AES.",
+      "line_number": 87,
+      "line_range": [
+        87
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b304-b305-ciphers-and-modes",
+      "test_id": "B304",
+      "test_name": "blacklist",
+      "_source": "impacket",
+      "_priority": 5
+    }
+  ],
+  "_meta": {
+    "tool": "bandit",
+    "sources": [
+      "pygoat",
+      "impacket"
+    ]
+  }
+}
