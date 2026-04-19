@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Resolve paths relative to repo root (two levels up from this file)
-_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # Load .env from backend/ directory — works whether running via uvicorn or directly
 _env_file = Path(__file__).parent.parent / ".env"
