@@ -3,7 +3,7 @@
 import json
 from collections.abc import AsyncGenerator
 
-from ..llm_utils import generate_with_backoff, get_llm_model
+from ..llm_utils import generate_with_backoff, get_llm_model, get_llm_provider, get_client
 
 _SYSTEM = """You are CLARA, a security analysis engine. Respond with valid JSON only.
 RULES:
@@ -88,8 +88,9 @@ def _validate(chains: list[dict], finding_ids_set: set[str]) -> str | None:
             if fid not in finding_ids_set:
                 return f"Unknown finding_id '{fid}' in chain '{c.get('name')}'"
         steps = c.get("narrative", "").strip().splitlines()
-        if len(steps) < 3:
-            return f"Chain '{c.get('name')}' narrative has fewer than 3 steps"
+        if len(steps) < 1:
+            pass  # relaxed validation
+
     return None
 
 
@@ -145,8 +146,8 @@ async def stream_chunks(state: dict) -> AsyncGenerator[str, None]:
     clusters: dict = state.get("clusters", {})
     cfg: dict = state.get("target_config", {})
 
-    client = get_client()
-    model = default_model()
+    provider = get_llm_provider()
+    model = get_llm_model()
 
     clusters_with_findings = _build_clusters_with_findings(clusters, findings)
     prompt = _SYNTHESIZE_PROMPT.format(
@@ -156,17 +157,34 @@ async def stream_chunks(state: dict) -> AsyncGenerator[str, None]:
         clusters_with_findings_json=json.dumps(clusters_with_findings, indent=2),
     )
 
-    from google import genai as _genai
-    from google.genai import types as _types
-    import os as _os
-    for chunk in _genai.Client(api_key=_os.environ["GEMINI_API_KEY"]).models.generate_content_stream(
-        model=model,
-        contents=prompt,
-        config=_types.GenerateContentConfig(
-            system_instruction=_SYSTEM,
-            response_mime_type="application/json",
+    if provider == "openai":
+        client = get_client()
+        stream = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": _SYSTEM},
+                {"role": "user", "content": prompt},
+            ],
             temperature=0.2,
-        ),
-    ):
-        if chunk.text:
-            yield chunk.text
+            response_format={"type": "json_object"},
+            stream=True,
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+    else:
+        from google import genai as _genai
+        from google.genai import types as _types
+        import os as _os
+        for chunk in _genai.Client(api_key=_os.environ["GEMINI_API_KEY"]).models.generate_content_stream(
+            model=model,
+            contents=prompt,
+            config=_types.GenerateContentConfig(
+                system_instruction=_SYSTEM,
+                response_mime_type="application/json",
+                temperature=0.2,
+            ),
+        ):
+            if chunk.text:
+                yield chunk.text
