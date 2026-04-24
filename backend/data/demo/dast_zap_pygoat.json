@@ -1,0 +1,134 @@
+{
+  "alerts": [
+    {
+      "name": "Absence of Anti-CSRF Tokens",
+      "riskcode": "2",
+      "confidence": "1",
+      "riskdesc": "Medium (Low)",
+      "solution": "<p>Phase: Architecture and Design</p><p>Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.</p><p>For example, use anti-CSRF packages such as the OWASP CSRFGuard.</p><p></p><p>Phase: Implementation</p><p>Ensure that your application is free of cross-site scripting issues, because most CSRF defenses can be bypassed using attacker-controlled script.</p><p></p><p>Phase: Architecture and Design</p><p>Generate a unique nonce for each form, place the nonce into the form, and verify the nonce upon receipt of the form. Be sure that the nonce is not predictable (CWE-330).</p><p>Note that this can be bypassed using XSS.</p><p></p><p>Identify especially dangerous operations. When the user performs a dangerous operation, send a separate confirmation request to ensure that the user intended to perform that operation.</p><p>Note that this can be bypassed using XSS.</p><p></p><p>Use the ESAPI Session Management control.</p><p>This control includes a component for CSRF.</p><p></p><p>Do not use the GET method for any request that triggers a state change.</p><p></p><p>Phase: Implementation</p><p>Check the HTTP Referer header to see if the request originated from an expected page. This could break legitimate functionality, because users or proxies may have disabled sending the Referer for privacy reasons.</p>",
+      "cweid": "352",
+      "wascid": "9"
+    },
+    {
+      "name": "Content Security Policy (CSP) Header Not Set",
+      "riskcode": "2",
+      "confidence": "3",
+      "riskdesc": "Medium (High)",
+      "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header.</p>",
+      "cweid": "693",
+      "wascid": "15"
+    },
+    {
+      "name": "Source Code Disclosure - Python",
+      "riskcode": "2",
+      "confidence": "2",
+      "riskdesc": "Medium (Medium)",
+      "solution": "<p>Ensure that application Source Code is not available with alternative extensions, and ensure that source code is not present within other files or data deployed to the web server, or served by the web server.</p>",
+      "cweid": "540",
+      "wascid": "13"
+    },
+    {
+      "name": "Application Error Disclosure",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Review the source code of this page. Implement custom error pages. Consider implementing a mechanism to provide a unique error reference/identifier to the client (browser) while logging the details on the server side and not exposing them to the user.</p>",
+      "cweid": "550",
+      "wascid": "13"
+    },
+    {
+      "name": "Cookie No HttpOnly Flag",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that the HttpOnly flag is set for all cookies.</p>",
+      "cweid": "1004",
+      "wascid": "13"
+    },
+    {
+      "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that the application/web server sets the Cross-Origin-Embedder-Policy header appropriately, and that it sets the Cross-Origin-Embedder-Policy header to 'require-corp' for documents.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that supports the Cross-Origin-Embedder-Policy header (https://caniuse.com/mdn-http_headers_cross-origin-embedder-policy).</p>",
+      "cweid": "693",
+      "wascid": "14"
+    },
+    {
+      "name": "Cross-Origin-Resource-Policy Header Missing or Invalid",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that the application/web server sets the Cross-Origin-Resource-Policy header appropriately, and that it sets the Cross-Origin-Resource-Policy header to 'same-origin' for all web pages.</p><p>'same-site' is considered as less secured and should be avoided.</p><p>If resources must be shared, set the header to 'cross-origin'.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that supports the Cross-Origin-Resource-Policy header (https://caniuse.com/mdn-http_headers_cross-origin-resource-policy).</p>",
+      "cweid": "693",
+      "wascid": "14"
+    },
+    {
+      "name": "Permissions Policy Header Not Set",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Permissions-Policy header.</p>",
+      "cweid": "693",
+      "wascid": "15"
+    },
+    {
+      "name": "Private IP Disclosure",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Remove the private IP address from the HTTP response body. For comments, use JSP/ASP/PHP comment instead of HTML/JavaScript comment which can be seen by client browsers.</p>",
+      "cweid": "497",
+      "wascid": "13"
+    },
+    {
+      "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "riskcode": "1",
+      "confidence": "3",
+      "riskdesc": "Low (High)",
+      "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details.</p>",
+      "cweid": "497",
+      "wascid": "13"
+    },
+    {
+      "name": "X-Content-Type-Options Header Missing",
+      "riskcode": "1",
+      "confidence": "2",
+      "riskdesc": "Low (Medium)",
+      "solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+      "cweid": "693",
+      "wascid": "15"
+    },
+    {
+      "name": "Authentication Request Identified",
+      "riskcode": "0",
+      "confidence": "3",
+      "riskdesc": "Informational (High)",
+      "solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+      "cweid": "-1",
+      "wascid": "-1"
+    },
+    {
+      "name": "Session Management Response Identified",
+      "riskcode": "0",
+      "confidence": "2",
+      "riskdesc": "Informational (Medium)",
+      "solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+      "cweid": "-1",
+      "wascid": "-1"
+    },
+    {
+      "name": "User Controllable HTML Element Attribute (Potential XSS)",
+      "riskcode": "0",
+      "confidence": "1",
+      "riskdesc": "Informational (Low)",
+      "solution": "<p>Validate all input and sanitize output it before writing to any HTML attributes.</p>",
+      "cweid": "20",
+      "wascid": "20"
+    }
+  ],
+  "_meta": {
+    "tool": "zap",
+    "source": "pygoat"
+  }
+}

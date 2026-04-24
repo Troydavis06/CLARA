@@ -636,7 +636,11 @@ export default function App() {
               <div className="space-y-4">
                 <h2 className="text-base font-bold text-gray-900">Attack Chains</h2>
                 {[...report.chains]
-                  .sort((a, b) => a.fix_priority - b.fix_priority)
+                  .sort((a, b) => {
+                    const sevRank: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+                    const sr = (sevRank[a.severity] ?? 3) - (sevRank[b.severity] ?? 3);
+                    return sr !== 0 ? sr : a.fix_priority - b.fix_priority;
+                  })
                   .map((chain) => (
                     <AttackChainCard key={chain.id} chain={chain} />
                   ))}
