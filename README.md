@@ -40,7 +40,7 @@ Expanded attack-chain dropdown with detailed context and an AI-generated fix ins
 flowchart LR
   browser[ReactViteFrontend]
   api[FastAPIBackend]
-  graph[LangGraphPipeline]
+  langGraphNode[LangGraphPipeline]
   llm[GeminiLLM]
   scans[ScannerJSONInputs]
   output[PrioritizedAttackChainReport]
@@ -48,9 +48,9 @@ flowchart LR
   scans --> api
   browser -->|POST /analyze| api
   api -->|SSE stream| browser
-  api --> graph
-  graph --> llm
-  graph --> output
+  api --> langGraphNode
+  langGraphNode --> llm
+  langGraphNode --> output
   output --> api
 ```
 
